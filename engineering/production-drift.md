@@ -441,6 +441,12 @@ began has been partially vacuous.
 
 ## Output format
 
+**Before finalizing any finding below: grep the flagged surface for a
+`REVIEWED` marker first** (see respect-settled-decisions). If one exists and
+its stated scope covers what you're about to flag, cite it and treat the
+matter as settled — a deliberately-kept piece of drift (like a documented
+override) is not the same as an undocumented one.
+
 Produce a report with these sections:
 
 ### DRIFT SUMMARY

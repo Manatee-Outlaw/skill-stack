@@ -194,6 +194,12 @@ For any API call made from one project to another:
 
 ## Output format
 
+**Before finalizing any finding below: grep the flagged surface for a
+`REVIEWED` marker first** (see respect-settled-decisions). If one exists and
+its stated scope covers what you're about to flag, cite it and treat the
+matter as settled rather than a fresh finding — an accepted-risk decision
+already recorded is not the same as an undiscovered one.
+
 Produce a report with these sections:
 
 ### SEVERITY RATINGS

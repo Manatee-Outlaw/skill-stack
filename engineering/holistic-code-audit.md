@@ -141,6 +141,11 @@ Every hardcoded "approximation" outlives the person who understood it.
 
 ## How to present findings
 
+**Before finalizing any finding below: grep the flagged surface for a
+`REVIEWED` marker first** (see respect-settled-decisions). If one exists and
+its stated scope covers what you're about to flag, cite it and treat the
+matter as settled — don't re-open a deliberate, reviewed decision.
+
 **Group by severity**, not by discipline:
 
 | Severity | When to use |

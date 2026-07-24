@@ -197,6 +197,12 @@ Check each of these screens for a brand-new user (no data):
 
 ## Reporting Format
 
+**Before finalizing any finding below: grep the flagged surface for a
+`REVIEWED` marker first** (see respect-settled-decisions). If one exists and
+its stated scope covers what you're about to flag, cite it and treat the
+matter as settled — don't re-flag it as friction, a blocker, or an
+inconsistency.
+
 Group findings by severity:
 - **BLOCKER** — a UX failure that will cause a streamer to give up, lose trust,
   or make a serious mistake — or, for internal tooling, cause a manager/scout/
