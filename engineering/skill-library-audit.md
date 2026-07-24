@@ -59,6 +59,41 @@ sensitive body in the report.
 
 ---
 
+## Step 0.5 — Orphan and dead-link check (run before the inventory)
+
+Two failure modes are invisible to every other step in this audit, because both
+look exactly like a healthy library from the inside:
+
+- **Orphan** — a skill file exists in the repo but is named in NO bundle. It
+  never loads. Nothing announces that it didn't. It is indistinguishable from a
+  skill that loaded correctly and simply never triggered.
+- **Dead link** — a bundle names a skill file that does not exist. The load
+  silently comes up short.
+
+Run both directions mechanically from a fresh clone or pull:
+
+```bash
+find . -name '*.md' -not -path './bundles/*' -not -path './.git/*' \
+  | sed 's|^\./||' | sort > /tmp/all_skills.txt
+grep -ohE '[a-z0-9-]+/[a-z0-9.-]+\.md' bundles/*.md | sort -u > /tmp/referenced.txt
+
+comm -23 /tmp/all_skills.txt /tmp/referenced.txt   # ORPHANS: in repo, in no bundle
+comm -13 /tmp/all_skills.txt /tmp/referenced.txt   # DEAD LINKS: in a bundle, not in repo
+```
+
+`legal-paralegal.md` is the only expected orphan — it is deliberately unbundled
+and loaded by hand. Ignore `bundles/*.md` self-references in the dead-link column.
+Everything else in either column is a finding, and both are IMMEDIATE priority:
+an orphan means a skill you believe you have is not actually in play.
+
+Also check for **half-registration** — a skill in a bundle's numbered load list
+but missing from its description list, trigger list, or "when to run" list. It
+loads, but nothing tells the session when to reach for it.
+
+Report all three counts before proceeding, even when zero.
+
+---
+
 ## Step 1 — Inventory the skill library
 
 From the files loaded in Step 0, record for each skill:

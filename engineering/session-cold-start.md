@@ -88,6 +88,18 @@ For each skill listed in the active bundles:
 
 Report which bundles are active and how many skills are available.
 
+**Orphan check.** If you have a local clone or pull, also confirm no skill file
+is missing from every bundle — an unreferenced file never loads and nothing says so:
+
+```bash
+comm -23 \
+  <(find . -name '*.md' -not -path './bundles/*' -not -path './.git/*' | sed 's|^\./||' | sort) \
+  <(grep -ohE '[a-z0-9-]+/[a-z0-9.-]+\.md' bundles/*.md | sort -u)
+```
+
+Expect exactly one line, `legal-paralegal.md`. Anything else is an orphan —
+surface it in the ready report as a flag, do not silently continue.
+
 ---
 
 ## Step 4 — Check production state (code projects only)
@@ -113,6 +125,16 @@ For non-code projects: skip this step.
 
 ## Step 5 — Report ready state
 
+**The receipt is mandatory and it is not optional formatting.** The first
+substantive answer of any session must be preceded by the block below. A session
+that skipped loading entirely produces output that looks exactly like a session
+that loaded correctly — confident, plausible, and missing every skill. The
+receipt is the only thing that makes the difference visible to the user, and the
+user is the only one positioned to catch it. No receipt = the load did not happen.
+
+If you find yourself answering a substantive question and no receipt has been
+printed this session, stop, load, and print it before answering.
+
 Produce a compact session brief:
 
 ```
@@ -137,6 +159,8 @@ Immediate priorities from last session:
 3. [third item]
 
 Skills loaded: [N skills across X bundles]
+Bundles read: [names, from GitHub HEAD]
+Orphans: [none | list]
 Ready to work.
 ```
 

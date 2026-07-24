@@ -4,6 +4,14 @@
 # -vN.N suffix to any file in this repo; that convention existed only because Google
 # Drive could not edit files in place, and suffixed filenames break the raw URLs that
 # project instructions point at.
+# Last substantive change: 2026-07-24 — registered engineering/adhd.md and
+# improve-system/skill.md. Both existed in the repo but were named in NO bundle, so no
+# session ever loaded them; adhd was missed on the exact request it was built for. An
+# unreferenced skill file fails silently — it looks identical to one that loaded and
+# simply did not trigger. Closed the loop in three places: push-to-git now refuses to
+# finish a commit that adds a skill file without a bundle entry, skill-library-audit and
+# session-cold-start now both run an orphan/dead-link check, and the load receipt is now
+# mandatory so a skipped load is visible to the user instead of silent.
 # Last substantive change: 2026-07-23 — added engineering/backlog-reconciliation.md
 # after two items independently flagged as the backlog's highest-risk open work
 # (TD-1, TD-34) turned out to already be fully done weeks earlier, with nothing
@@ -62,8 +70,15 @@ Load these skills at the start of any software/coding project conversation.
 35. engineering/hermes-upload.md
 36. engineering/backlog-reconciliation.md
 37. engineering/respect-settled-decisions.md
+38. engineering/adhd.md
+39. improve-system/skill.md
 
 (copy-review, database-review and board-of-directors are intentionally absent — see the PRIVATE section below.)
+
+(`legal-paralegal.md` at the repo root is the ONE file intentionally left unbundled — it
+is loaded by hand when legal drafting is needed. Every other skill file in this repo must
+appear in at least one bundle. A file that is in the repo but in no bundle is an ORPHAN:
+it never loads, and nothing announces that it didn't. Register it or delete it.)
 
 ## What each skill does (plain English)
 
@@ -104,6 +119,8 @@ Load these skills at the start of any software/coding project conversation.
 - **discord-announcements** — Drafts Discord announcements. Trigger: "draft a Discord announcement".
 - **hermes-upload** — Generates a handoff document and uploads to Drive. Every number in the handoff carries its provenance — sample or population, measured or estimated, by whom — because the handoff is the one document every cold start trusts and never re-derives, so a denominator dropped here becomes a false statistic downstream. Trigger: "hermes upload".
 - **backlog-reconciliation** — Determines the REAL current status of every tracked backlog item (TD-/DF-/BUG-/PE- numbered or otherwise) by combining a git log sweep with a full documentation cross-reference, rather than trusting an existing document's claimed status. Built after TD-1 and TD-34 both sat on the active backlog for weeks after already being finished. Trigger: "reconcile the backlog", "audit our backlog", "is this still open".
+- **adhd** — Parallel divergent ideation for open-ended, high-stakes decisions. Spawns 5 isolated Agent branches under different cognitive frames (regulator, biology, speedrunner, 10-year-old, $0-budget), then scores, clusters, flags traps, and deepens the top 3. Role-neutral by design — works on architecture, schema, public API surface and fuzzy no-root-cause bugs, and equally on pricing, positioning, naming and go-to-market. Costs ~10 Agent calls (5–10x a single answer), so it self-gates: skip for lookups, syntax, known answers, or closed phrasing ("quick", "standard", "canonical"). Trigger: "/adhd", "brainstorm", "let's figure out", "help me think through", "explore options", "what are my options", "ideate".
+- **improve-system** — End-of-session review that folds what actually happened back into the skill library: updates skill files that were iterated on, saves lessons and decisions to the knowledge folder, flags stale or duplicated content. Complements hermes-upload — hermes records what happened, improve-system changes the system because of it. Trigger: "/improve-system".
 
 ## PRIVATE — not in this repo; load from Google Drive
 
@@ -131,6 +148,8 @@ rather than assuming a filename. The private set is exactly:
 - hostile-environment-testing: before shipping any installer/launcher/scheduled-script change.
 - anticipate-user-mistakes: before shipping any new user-facing control, and inside every comprehensive audit.
 - ponytail-audit: periodically as part of a comprehensive audit, or after a long stretch of active feature development.
+- adhd: at decision points where the obvious answer is expensive to be wrong about — architecture, public API surface, schema, pricing, positioning, naming, launch angle, or a bug with no clear root cause. Not for routine implementation.
+- improve-system: at the end of any session where something was genuinely built, iterated, or learned — run it alongside hermes-upload, not instead of it.
 - backlog-reconciliation: before writing any new comprehensive backlog document; every 4-6 weeks as standing hygiene; and immediately whenever a supposedly high-risk or blocking item turns out, on investigation, to already be resolved.
 
 ## Comprehensive audit — self-contained, no manual steps needed

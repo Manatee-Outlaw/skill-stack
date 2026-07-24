@@ -31,6 +31,36 @@ today's date.
 
 ---
 
+### Step 1.5 — Skill registration gate (run before creating task.md)
+
+If this commit adds or renames ANY file under a skill directory
+(`engineering/`, `productivity/`, `enterprise/`, `creative/`, `improve-system/`),
+the push is NOT complete until that file is named in at least one bundle.
+
+Check it mechanically, do not eyeball it:
+
+```bash
+comm -23 \
+  <(find . -name '*.md' -not -path './bundles/*' -not -path './.git/*' | sed 's|^\./||' | sort) \
+  <(grep -ohE '[a-z0-9-]+/[a-z0-9.-]+\.md' bundles/*.md | sort -u)
+```
+
+Anything this prints — other than `legal-paralegal.md`, which is intentionally
+unbundled — is an ORPHAN. Stop and register it in the right bundle(s) first,
+then re-run the check and continue.
+
+Registering means all four of: the numbered load list, the "what each skill
+does" description, the trigger line, and the "when to run" line. A file added to
+the load list but described nowhere is half-registered.
+
+Why this gate exists: on 2026-07-24 `engineering/adhd.md` was committed and
+pushed correctly, but no bundle referenced it, so no session ever loaded it. It
+was then missed on a brainstorm request — the exact use case it was written for.
+Writing the file is half the job; publishing it is the other half. An unregistered
+skill fails silently and looks identical to one that loaded and didn't trigger.
+
+---
+
 ### Step 2 — Create task.md
 
 Use bash_tool to create `/mnt/user-data/outputs/task.md` with the following content,
@@ -81,3 +111,4 @@ After the user pastes the Claude Code output back here:
   but NOT live — flag this clearly
 - Always use the exact SSH command above — do not abbreviate or skip the restart
 - Never use `git add .` blindly — use `git add -u` for modified tracked files
+- Never report a skill as "pushed", "added", or "live" on the strength of the commit alone — a skill is live only once a bundle names it. Run the Step 1.5 orphan check and quote its (empty) output before saying so.

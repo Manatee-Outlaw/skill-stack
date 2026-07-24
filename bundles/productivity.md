@@ -4,6 +4,11 @@
 # -vN.N suffix to any file in this repo; that convention existed only because Google
 # Drive could not edit files in place, and suffixed filenames break the raw URLs that
 # project instructions point at.
+# Last substantive change: 2026-07-24 — registered engineering/adhd.md here as well as in
+# engineering.md. It was committed 2026-07-24 but named in no bundle, so it never loaded.
+# It is explicitly role-neutral (strategy, pricing, positioning, naming), which makes it a
+# planning skill at least as much as an engineering one — the miss that exposed it was a
+# product-strategy brainstorm, not a coding task.
 # Last substantive change: 2026-07-14 — de-versioned the library (dropped -vN.N
 # suffixes).
 # Last substantive change: 2026-07-15 — board-of-directors moved OUT of this repo
@@ -23,6 +28,7 @@ Load these skills for general planning, decision-making, personal development, a
 7. engineering/no-assumed-memory.md
 8. engineering/propagate-the-lesson.md
 9. engineering/close-known-gaps.md
+10. engineering/adhd.md
 
 ## What each skill does (plain English)
 
@@ -36,12 +42,15 @@ Load these skills for general planning, decision-making, personal development, a
 - **propagate-the-lesson** — Whenever a genuinely general-purpose lesson or fix is identified, check every bundle for the same applicability. Now also explicitly checks whether a new skill needs registering in comprehensive-audit's own lists, not just added to a bundle. Always-on.
 - **close-known-gaps** — Once a real, known issue has been surfaced, the default is to fix it now rather than narrowing scope. Always-on.
 
+- **adhd** — Parallel divergent ideation for open-ended, high-stakes decisions. Spawns 5 isolated branches under different cognitive frames, then scores, clusters, flags the traps, and deepens the top 3. Use it where the obvious answer is expensive to get wrong: pricing, positioning, naming, a launch angle, a go-to-market bet, or a problem with no clear root cause. Pairs with grill-me — adhd widens the option set, grill-me stress-tests the option you pick. Costs ~10 Agent calls; skip for closed phrasing ("quick", "standard", "canonical").
+
 ## How to trigger each skill
 
 - "Grill me on this" → grill-me
 - "Coach me" / "Run my Human 3.0 assessment" → human-3-0
 - "Help me plan this" / "Should we build or buy" → project-planning
 - "Build me a command center" → niche-command-center-build
+- "Brainstorm this" / "Let's figure out" / "Help me think through" / "Explore options" / "What are my options" / "/adhd" → adhd
 - verify-before-versioning, trust-the-live-signal, no-assumed-memory, propagate-the-lesson, and close-known-gaps trigger automatically.
 
 ## Note on board-of-directors — NOT IN THIS REPO

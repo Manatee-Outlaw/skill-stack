@@ -4,6 +4,10 @@
 # -vN.N suffix to any file in this repo; that convention existed only because Google
 # Drive could not edit files in place, and suffixed filenames break the raw URLs that
 # project instructions point at.
+# Last substantive change: 2026-07-24 — registered engineering/adhd.md here too. Its own
+# description names campaign angles, positioning, pitch and pricing as target use cases,
+# so a brand/comms session should have it available. It was committed 2026-07-24 but named
+# in no bundle, so it never loaded anywhere.
 # Last substantive change: 2026-07-14 — de-versioned the library (dropped -vN.N
 # suffixes).
 # Last substantive change: 2026-07-15 — board-of-directors moved OUT of this repo
@@ -21,6 +25,7 @@ Load these skills for business communications and brand-consistent output.
 5. engineering/no-assumed-memory.md
 6. engineering/propagate-the-lesson.md
 7. engineering/close-known-gaps.md
+8. engineering/adhd.md
 
 ## What each skill does
 
@@ -32,10 +37,13 @@ Load these skills for business communications and brand-consistent output.
 - **propagate-the-lesson** — Whenever a genuinely general-purpose lesson or fix is identified, check every bundle for the same applicability. Now also explicitly checks whether a new skill needs registering in comprehensive-audit's own lists, not just added to a bundle. Always-on.
 - **close-known-gaps** — Once a real, known issue has been surfaced, the default is to fix it now rather than narrowing scope. Always-on.
 
+- **adhd** — Parallel divergent ideation for open-ended, high-stakes decisions. Spawns 5 isolated branches under different cognitive frames, scores and clusters the results, flags the traps, and deepens the top 3. For brand and comms work this is the campaign-angle, positioning, naming and pricing skill — it exists to stop the first three obvious answers from becoming the answer. Costs ~10 Agent calls; skip for closed phrasing ("quick", "standard", "canonical").
+
 ## How to trigger each skill
 
 - "Apply our brand to this" / "Make this on-brand" → brand-guidelines
 - "Write a status update" / "Draft an email to leadership" → internal-comms
+- "Brainstorm this" / "Campaign ideas" / "Positioning ideas" / "How should I pitch/price/name this" / "/adhd" → adhd
 - verify-before-versioning, trust-the-live-signal, no-assumed-memory, propagate-the-lesson, and close-known-gaps trigger automatically.
 
 ## Note on brand-guidelines
