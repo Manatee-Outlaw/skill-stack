@@ -1,11 +1,1 @@
-# Working artifacts — never publish
-*.zip
-triage-*.md
-phase2-*.md
-*.docx
-
-# The private skill set — never publish, even if a copy ever wanders in
-board-of-directors-default-profile*
-copy-review.md
-database-review.md
-blocklist.txt
+dist/

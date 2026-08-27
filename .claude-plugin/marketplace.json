@@ -1,0 +1,15 @@
+{
+  "name": "skill-stack",
+  "owner": { "name": "Manatee-Outlaw" },
+  "metadata": {
+    "description": "Project-agnostic skill library. Machine tier ships as plugins; universal tier uploads to the claude.ai account store.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    { "name": "skill-core",         "source": "./plugins/skill-core",         "description": "Always-on reasoning disciplines plus adhd divergent ideation. Install on every machine." },
+    { "name": "skill-engineering",  "source": "./plugins/skill-engineering",  "description": "Code, architecture, security and release audits. Requires a codebase." },
+    { "name": "skill-creative",     "source": "./plugins/skill-creative",     "description": "Visual design, generative art, and artifact theming." },
+    { "name": "skill-productivity", "source": "./plugins/skill-productivity", "description": "Planning, coaching, and decision stress-testing." },
+    { "name": "skill-enterprise",   "source": "./plugins/skill-enterprise",   "description": "Brand, internal comms, and legal drafting." }
+  ]
+}
