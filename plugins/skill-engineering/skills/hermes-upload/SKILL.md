@@ -4,6 +4,8 @@ description: Generate a structured handoff document from the current conversatio
 metadata:
   tier: universal
   plugin: skill-engineering
+  portability_exempt:
+    drive-ref: "Google Drive is this skill's delivery target until the Notion port (KNOWN-ISSUES 3)."
 ---
 
 # Hermes Upload

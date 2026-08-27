@@ -10,6 +10,8 @@ description: >
 metadata:
   tier: universal
   plugin: skill-core
+  portability_exempt:
+    drive-ref: "Names Drive only in the historical record of why this skill exists."
 ---
 
 # Verify Before Versioning

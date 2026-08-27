@@ -11,6 +11,9 @@ description: >
 metadata:
   tier: machine
   plugin: skill-engineering
+  portability_exempt:
+    drive-ref: "Names the pattern it must detect during the staleness check."
+    raw-github: "Names the pattern it must detect during the staleness check."
 ---
 
 # Skill Library Audit
