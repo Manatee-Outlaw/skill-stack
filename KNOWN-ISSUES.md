@@ -1,24 +1,17 @@
 # Known issues
 
-Tracked deliberately rather than bodged. `scripts/validate.py` fails on 1 and 2 by design —
+Tracked deliberately rather than bodged. `scripts/validate.py` fails on item 2 by design —
 that failure is the reminder.
 
-## 1. `skill-library-audit` — needs a rewrite, not a patch
+## 1. ~~`skill-library-audit`~~ — RESOLVED, rewritten
 
-Built end-to-end on the retired `bundles/` system:
+Rewritten around reachability rather than list membership. The orphan and dead-link checks
+were structurally impossible without bundles; they are replaced by seven checks —
+reachability, trigger collision, tier correctness, cross-reference integrity, staleness,
+redundancy, coverage gaps.
 
-- Step 0 loads skills from `raw.githubusercontent.com/.../vibecraft-skills/main/<bundle>/`
-- The orphan check is defined as "a skill in the repo named in NO bundle"
-- The dead-link check is "a bundle names a skill that does not exist"
-- Reporting counts "skills in active bundles"
-
-**Both checks are now structurally impossible** — there are no bundles to fall off. The
-replacement concept is different: a skill is unreachable not when it is unlisted but when
-its *description* is too vague to trigger. That is a genuinely harder audit and deserves
-designing, not patching.
-
-Also still references Google Drive as the private-skill home. Private skills now live in
-`skill-stack-private`.
+The `comprehensive-audit` AUDIT SKILLS list is the one place the old dead-link check still
+genuinely applies, and Check 4 covers it.
 
 ## 2. `improve-system` — needs the Notion lesson log
 
@@ -55,3 +48,15 @@ destination until the port.)*
   plugin and slim the wrapper.
 - **Untested:** whether a local-path marketplace re-reads each session or caches. If it
   caches, the scheduled `git pull` needs a refresh step.
+
+## 5. External skills cannot easily go universal
+
+External skills (`impeccable`, `ponytail`, upstream `adhd`) install cleanly as machine-tier
+plugins, where no description length limit is documented.
+
+Promoting one to the **universal** tier means the account store's 1,024-character
+description cap applies — and you do not control an upstream author's description. Doing so
+would require forking the skill, which contradicts the reference-and-pin policy (§2B.3).
+
+**Consequence:** external skills are machine-tier by default. Treat any wish to make one
+universal as a decision to fork, and weigh it as such.

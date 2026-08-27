@@ -1,15 +1,13 @@
 ---
 name: skill-library-audit
 description: >
-  Audit the entire skill library to find gaps, overlaps, stale content, and
-  improvement opportunities. Use this skill whenever the user asks to "audit
-  our skills", "check the skill library", "what skills are we missing",
-  "do a gap analysis on our skills", or "review our skills". Also trigger
-  proactively after any major project sprint where new workflows emerged that
-  aren't yet captured as skills — if the user just finished a large build
-  session and asks "what are we missing?", this is the right skill. The goal
-  is to make the skill library a living, accurate reflection of how work
-  actually gets done.
+  Audit the whole skill library for reachability, overlap, staleness, mis-tiering and
+  broken cross-references. Use when the user asks to "audit our skills", "audit the skill
+  library", "check the skill library", "are my skills working", "which skills never fire",
+  "is anything stale", or after adding several skills at once. The central question is
+  reachability: a skill whose description does not match how the user actually speaks is
+  unreachable, and looks identical to one that loaded and simply did not trigger. Run
+  quarterly, or whenever a skill "should have fired" and didn't.
 metadata:
   tier: machine
   plugin: skill-engineering
@@ -17,307 +15,172 @@ metadata:
 
 # Skill Library Audit
 
-A skill for auditing the skill library itself — finding what's missing,
-what's stale, what overlaps, and what's never used.
+## What changed, and why this skill was rewritten
 
----
+The previous version audited a **load-list** system. Skills were listed in bundle files,
+and its two headline checks were:
 
-## Step 0 — Load the full skill library (hybrid: public GitHub + private Drive)
+- **Orphan** — a skill exists in the repo but is named in no bundle
+- **Dead link** — a bundle names a skill that does not exist
 
-Before doing any analysis, read every skill file in full. Do not rely on
-skills already in context — the full library must be explicitly loaded to
-audit it completely.
+Both checks are now **structurally impossible**. There are no bundles. Every skill in an
+installed plugin is available, and each triggers on its own `description`.
 
-Since the 2026-07-15 skills-repo migration the library lives in TWO places,
-and both must be loaded:
+**The underlying failure did not go away — it changed shape.** A skill used to be
+unreachable because nobody added it to a list. Now it is unreachable because its
+description does not match the words the user actually says. Both fail silently, and both
+are indistinguishable from a skill that loaded and simply wasn't relevant.
 
-1. **Public skills — the GitHub repo (source of truth).** Fetch each file
-   from `raw.githubusercontent.com/Manatee-Outlaw/vibecraft-skills/main/<bundle>/<skill>.md`.
-   Use `curl` (cache-busted), NOT WebFetch — WebFetch summarises through a
-   small model and a skill must be audited from its exact text. The Drive
-   copy of the public skills is a FOSSIL (proven stale on 2026-07-15); never
-   audit against it. Enumerate the real file list from the repo, e.g.
-   `git ls-files engineering/` in a local clone, or the GitHub API tree
-   endpoint — do not trust a hardcoded list here, it will drift.
+Auditing a load list was mechanical: compare two sets. Auditing reachability is a
+judgement call, so most of this skill is about making that judgement well.
 
-2. **Private skills — Google Drive (their only home).** A small set was
-   hard-walled out of the public repo (2026-07-14/15) because they name real
-   people, personal/financial detail, or live operational internals — e.g.
-   `engineering/copy-review.md`, `engineering/database-review.md`,
-   `productivity/board-of-directors*.md`. These live ONLY in Drive (and the
-   local `vibecraft-skills-PRIVATE` mirror, which is NOT a git repo and must
-   never become one). Load these via the Google Drive MCP tools
-   (`search_files` with parentId filtering, then `download_file_content`) or
-   from the local private mirror.
-
-Also load any bundle manifest (`engineering.md`, `enterprise.md`,
-`creative.md`) that lists which skills are active — these tell you which
-skills are actually loaded vs. just stored.
-
-Build a complete inventory across BOTH sources before proceeding to Step 1.
-If a skill file cannot be read, flag it as UNREADABLE and continue — an
-unreadable skill is itself a finding. If a private skill's content is
-sensitive, audit its classification and freshness without re-surfacing the
-sensitive body in the report.
-
----
-
-## Step 0.5 — Orphan and dead-link check (run before the inventory)
-
-Two failure modes are invisible to every other step in this audit, because both
-look exactly like a healthy library from the inside:
-
-- **Orphan** — a skill file exists in the repo but is named in NO bundle. It
-  never loads. Nothing announces that it didn't. It is indistinguishable from a
-  skill that loaded correctly and simply never triggered.
-- **Dead link** — a bundle names a skill file that does not exist. The load
-  silently comes up short.
-
-Run both directions mechanically from a fresh clone or pull:
+## Step 0 — Load the library
 
 ```bash
-find . -name '*.md' -not -path './bundles/*' -not -path './.git/*' \
-  | sed 's|^\./||' | sort > /tmp/all_skills.txt
-grep -ohE '[a-z0-9-]+/[a-z0-9.-]+\.md' bundles/*.md | sort -u > /tmp/referenced.txt
-
-comm -23 /tmp/all_skills.txt /tmp/referenced.txt   # ORPHANS: in repo, in no bundle
-comm -13 /tmp/all_skills.txt /tmp/referenced.txt   # DEAD LINKS: in a bundle, not in repo
+python3 scripts/validate.py            # structural gate; fix failures before auditing
+find plugins -name SKILL.md | wc -l    # expected skill count
 ```
 
-`legal-paralegal.md` is the only expected orphan — it is deliberately unbundled
-and loaded by hand. Ignore `bundles/*.md` self-references in the dead-link column.
-Everything else in either column is a finding, and both are IMMEDIATE priority:
-an orphan means a skill you believe you have is not actually in play.
+Read every `SKILL.md` **in full from disk**. Do not audit from memory of a previous
+session, and do not audit from a summary — a description must be assessed as its exact
+text (`no-assumed-memory`, `trust-the-live-signal`).
 
-Also check for **half-registration** — a skill in a bundle's numbered load list
-but missing from its description list, trigger list, or "when to run" list. It
-loads, but nothing tells the session when to reach for it.
+Also load, if present:
 
-Report all three counts before proceeding, even when zero.
+- `skill-stack-private/` — the private set. Audited the same way, reported separately, and
+  **never** quoted in a report that could be shared.
+- The external manifest — pinned third-party skills. Audit whether the pin is current, not
+  the skill's content; upstream owns that.
 
----
+## The seven checks
 
-## Step 1 — Inventory the skill library
+### Check 1 — Reachability *(replaces the orphan check)*
 
-From the files loaded in Step 0, record for each skill:
-- Name (from frontmatter)
-- Description (the triggering text, from frontmatter)
-- What it claims to do (from body)
-- Whether it's in an active bundle or standalone
-- Whether it's general-purpose or project-specific
+For each skill, ask: **if the user described this need in their own words, would this
+description match?**
 
-Organize into categories:
-- Engineering / code quality skills
-- Operations / infrastructure skills
-- Business / workflow skills
-- Meta skills (skills about skills)
-- Project-specific skills
+Flag as **UNREACHABLE** when any of these hold:
 
-Report the full inventory before doing any analysis.
+- Description under ~60 characters — too thin to discriminate
+- Describes *what the skill is* but never *when to use it*
+- Contains no trigger phrasing a person would actually say out loud
+- Uses only internal vocabulary the user never speaks
+- The only trigger is a slash command — that requires memorising it, which the
+  description-matching system exists to eliminate
 
----
+**Test properly:** write three sentences a real person would say when they need this
+skill. Check each against the description. Fewer than two plausible matches ⇒ UNREACHABLE.
 
-## Step 2 — Gap analysis
+### Check 2 — Trigger collision
 
-A gap is a workflow that happens repeatedly but no skill covers it.
+Two skills whose descriptions cover the same phrasing compete, and which one fires is
+unpredictable.
 
-Sources for gap detection:
-1. **Recent conversation history** — what tasks came up repeatedly that
-   required improvisation? Any time Claude had to figure something out
-   from scratch that could have been a skill, that's a gap candidate.
-2. **Audit findings** — did a recent audit (engineering, security, etc.)
-   surface a check that wasn't in any skill? Example: execute permission
-   checks on cron-called scripts — found in production but missing from
-   the production-drift skill until it caused a real failure.
-3. **Recurring fixes** — bugs that were fixed multiple times suggest a
-   skill should capture the pattern.
-4. **Handoff friction** — anything that required significant re-explanation
-   at the start of a new session is a skill gap.
-5. **Skills that reference each other** — if skill A frequently leads to
-   skill B, there may be a missing skill that combines them.
+For every pair, flag **COLLISION** when both plausibly match the same request. Report as a
+pair, never one skill alone. Resolve by narrowing the descriptions until each owns
+distinct territory — or by merging them, if they are genuinely one skill.
 
-For each gap identified:
-- Name the missing skill
-- Describe what it would do
-- Give an example trigger phrase
-- Rate impact: HIGH / MEDIUM / LOW
-- Note whether it's project-specific or general-purpose
+Pay attention to audit skills specifically: `engineering-review`, `holistic-code-audit`,
+`architecture-review` and `comprehensive-audit` all plausibly match "audit my code."
 
----
+### Check 3 — Tier correctness
 
-## Step 3 — Staleness check
+Each skill declares `metadata.tier`. Verify against one test: **does it require a codebase,
+git, or local files?**
 
-A skill is stale when its content references outdated tools, APIs,
-versions, patterns, or workflows.
+- `tier: machine` but no filesystem dependency ⇒ **UNDER-REACHING.** It could work on a
+  tablet and is being withheld for no reason.
+- `tier: universal` but needs a repo ⇒ **MIS-TIERED.** It will be uploaded to the account
+  store, appear on a tablet, and fail when invoked there.
 
-Check each skill for:
-- Version numbers (plugin versions, library versions) that may have changed
-- API endpoints or field names that have been updated
-- Tool names that have been renamed or replaced
-- Workflow steps that have been superseded
-- Project-specific constants (table names, file paths, config keys) that
-  have drifted from reality
-- Documentation claims that contradict current known behavior
-- Expected counts (e.g. "8 cron jobs" when there are now 12) that have
-  grown stale as the project evolved
+Mis-tiering is the more damaging direction: it produces a skill that is present and broken
+rather than merely absent.
 
-Flag each as:
-- STALE: Content is demonstrably wrong based on current knowledge
-- LIKELY STALE: References specifics that may have changed
-- REVIEW NEEDED: Hasn't been touched in a long time, may drift
+### Check 4 — Cross-reference integrity *(replaces the dead-link check)*
 
----
+Skills reference each other by name. Extract every referenced skill name and confirm it
+exists. Flag **BROKEN REFERENCE** for any that does not.
 
-## Step 4 — Overlap detection
+Watch particularly for references to retired skills. `session-cold-start` and the four
+bundle files were removed; any skill still pointing at them is stale.
 
-Two skills overlap when they cover similar territory and a user might
-not know which to use, or Claude might load both unnecessarily.
+`comprehensive-audit` carries its own AUDIT SKILLS list and dispatches one subagent per
+entry — that list is a cross-reference set and must be checked against reality. This is
+the closest surviving equivalent of the old dead-link check, and the only place it still
+genuinely applies.
 
-Check for:
-- Skills with similar trigger phrases
-- Skills that accomplish the same goal via different approaches
-- Skills where one is a subset of another (consolidation candidate)
-- Skills that should reference each other but don't
+### Check 5 — Staleness
 
-For each overlap:
-- Name both skills
-- Describe the overlap
-- Recommend: CONSOLIDATE / KEEP SEPARATE WITH CLEARER TRIGGERS / ADD CROSS-REFERENCE
+Flag any skill that:
 
----
+- References the retired `bundles/` system or instructs "load the X bundle"
+- Instructs a Google Drive version search (the `-vN.N` convention is retired everywhere)
+- References `raw.githubusercontent.com` into this repo — skills reference by name, not link
+- Names a project (`validate.py` catches this; report it here too)
+- Describes a workflow that no longer exists
 
-## Step 5 — Trigger quality check
+### Check 6 — Overlap and redundancy
 
-A skill with a poorly written trigger description either never fires
-(undertriggering) or fires when it shouldn't (overtriggering).
+Distinct from collision: two skills may trigger cleanly but do substantially the same work.
+Flag **REDUNDANT** with a recommendation to merge, and say which should absorb which.
 
-For each skill, evaluate:
-- Does the description clearly state WHEN to use it?
-- Does it include example phrases a user would naturally say?
-- Is it specific enough to not trigger on unrelated requests?
-- Is it "pushy" enough? Skills tend to undertrigger — descriptions
-  should actively encourage use in relevant situations.
-- Does it accurately describe what the skill produces?
+### Check 7 — Coverage gaps
 
-Flag:
-- UNDERTRIGGER RISK: Description is too vague or passive
-- OVERTRIGGER RISK: Description so broad it might fire inappropriately
-- MISMATCH: Description doesn't match what the skill actually does
+Look at the library as a whole. What does the user do regularly that no skill supports?
+Evidence, not speculation: recent work where a skill would have helped and none existed.
+This is the only check that produces additions rather than corrections.
 
----
+## Report format
 
-## Step 6 — Completeness check
+```
+SKILL LIBRARY AUDIT — <date>
 
-A complete skill has:
-- Clear inputs (what does the user provide?)
-- Clear outputs (what does the skill produce?)
-- A success criterion (how do you know it worked?)
-- Error handling (what if something goes wrong?)
-- At least one example or test case
+Skills audited: N   (universal: N | machine: N)
+Private skills audited separately: N
+Structural validation: PASS / FAIL (n errors)
 
-For each skill, flag any missing components.
+UNREACHABLE (n)
+  <skill> — <why> — suggested description fix
 
----
+COLLISIONS (n)
+  <skill-a> vs <skill-b> — overlapping phrasing — resolution
 
-## Step 7 — Generate recommendations
+TIER ERRORS (n)
+  <skill> — declared <tier>, should be <tier> — why
 
-Produce a prioritized action list:
+BROKEN REFERENCES (n)
+  <skill> references <missing> — <exists? renamed? retired?>
 
-### IMMEDIATE (fix this session)
-Skills with critical gaps or staleness that are actively causing problems.
+STALE (n)
+  <skill> — <what is out of date>
 
-### HIGH PRIORITY (fix next session)
-Gaps in frequently-used workflows. Skills stale in ways that could
-cause incorrect behavior.
+REDUNDANT (n)
+  <skill-a> / <skill-b> — merge recommendation
 
-### MEDIUM PRIORITY (fix within a few sessions)
-Trigger improvements, overlap consolidation, completeness gaps.
+COVERAGE GAPS (n)
+  <need> — evidence it exists
 
-### LOW PRIORITY (nice to have)
-Minor improvements, rarely-used skills, polish.
+FULL INVENTORY
+  <name> — <one line> — <plugin> — <tier> — <reachability: OK/WEAK/UNREACHABLE>
+```
 
-For each new skill recommended, include:
-- Suggested name
-- One-sentence description
-- What gap it fills
-- Example trigger phrase
+## Rules for running this audit
 
----
+- **Read every file.** A skimmed description cannot be judged for reachability.
+- **Quote the evidence.** Every finding names the skill and quotes the offending text.
+  A finding without a quote is an opinion (`verify-before-claiming`).
+- **Do not fix while auditing.** Produce findings; fix in a separate pass. Editing mid-audit
+  changes what later checks are reading.
+- **A clean check needs proof it could have failed.** Reporting "no collisions" requires
+  having actually compared pairs. An audit that silently skipped a check produces output
+  identical to one that passed.
+- **Never quote private-skill contents** into a report that might be shared.
 
-## Output format
+## Relationship to other skills
 
-=== SKILL LIBRARY AUDIT ===
-Skills loaded from Drive: N
-Skills in active bundles: N
-Total unique skills: N
-
-=== INVENTORY ===
-[skill name] — [one-line description] — [category] — [bundle/standalone]
-...
-
-=== GAPS FOUND ===
-[HIGH/MEDIUM/LOW] [Skill name]: [what it would do]
-Trigger: "[example phrase]"
-Gap source: [where this gap was discovered]
-...
-
-=== STALENESS FLAGS ===
-[STALE/LIKELY STALE/REVIEW NEEDED] [skill name]: [what's stale]
-...
-
-=== OVERLAPS ===
-[skill A] + [skill B]: [nature of overlap] → [recommendation]
-...
-
-=== TRIGGER QUALITY ===
-[UNDERTRIGGER/OVERTRIGGER/MISMATCH] [skill name]: [issue]
-...
-
-=== COMPLETENESS GAPS ===
-[skill name]: missing [inputs/outputs/success criteria/examples]
-...
-
-=== RECOMMENDED ACTIONS ===
-IMMEDIATE:
-1. [action]
-
-HIGH PRIORITY:
-1. [action]
-
-MEDIUM PRIORITY:
-1. [action]
-
-LOW PRIORITY:
-1. [action]
-
----
-
-## Notes on project-specific vs. general skills
-
-Some skills are general-purpose (work on any project). Others are
-project-specific (reference file paths, table names, API keys).
-When auditing:
-
-- General skills should stay generic — flag any project-specific
-  hardcoding that crept in
-- Project-specific skills should be clearly labeled as such
-- If a project-specific skill describes a pattern useful across projects,
-  recommend extracting a general version
-
----
-
-## Notes on the execute permission gap (real example)
-
-In June 2026, a production failure revealed that a `<scheduled-script>` had
-mode 100644 (non-executable) in git. Cron fired on schedule, got
-"Permission denied", wrote nothing to logs, and no alert fired.
-12 days of silent report failures. The production-drift skill existed
-but didn't check execute permissions.
-
-This is the canonical example of a skill gap: a real failure pattern
-that should have been caught by an existing skill but wasn't because
-the skill's scope was too narrow. When doing the gap analysis, look
-for similar "the skill existed but missed this" patterns.
-
-The fix: production-drift.md now includes Step 4 (Execute Permission
-Audit) as a general-purpose check for any project using cron.
+- **`validate.py`** is the structural gate — names, limits, duplicates, portability. It runs
+  per commit and answers "is this well-formed?" This skill answers "is this *reachable and
+  coherent?*", which no script can decide.
+- **`verify-before-versioning`** is the in-the-moment discipline before a single write. This
+  is the periodic sweep across everything.
+- **`comprehensive-audit`** audits a codebase. This audits the skills that do the auditing.
