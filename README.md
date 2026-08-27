@@ -61,5 +61,5 @@ Checks structure, name and description limits, duplicates, and the portability g
 ## Related
 
 - `skill-stack-private` — sensitive skills. Local only. Never pushed, never uploaded.
-- External skills are referenced and pinned, never copied: `pbakaus/impeccable`,
-  `DietrichGebert/ponytail`, `UditAkhourii/adhd`.
+- `EXTERNALS.md` — every third-party dependency, pinned. Referenced, never copied.
+  Includes `adhd`, which is a **declared managed fork** with a documented re-sync procedure.

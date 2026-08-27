@@ -40,14 +40,24 @@ rather than failing silently.
 *(Exempted in `validate.py`'s allowlist meanwhile, since Drive is legitimately its
 destination until the port.)*
 
-## 4. Unresolved from planning
+## 4. ~~Unresolved from planning~~ — mostly RESOLVED
 
-- **`unlazy` is missing.** Not anywhere in `F:\Projects`. Pi or claude.ai account.
-- **ADHD duplication** — `UditAkhourii/adhd` upstream vs the local `adhd`. Pick a canonical one.
-- **`ponytail-audit`** is a wrapper around `DietrichGebert/ponytail`. Install the real
-  plugin and slim the wrapper.
+- **`unlazy`** — found: `Leonxlnx/unlazy` (MIT). Not marketplace-installable; installs via
+  `npx skills add`. Pinned in `EXTERNALS.md`, machine-tier. **RESOLVED.**
+- **ADHD duplication** — bodies were identical; only the description diverged. Kept local as
+  a **declared managed fork** with a quarterly re-sync procedure in `EXTERNALS.md`.
+  Deleting it would have lost the business triggers that make it universal-tier. **RESOLVED.**
+- **`ponytail-audit`** — inspected and already a correct thin wrapper. Records ownership,
+  source and relevant commands; does not restate upstream logic. **No slimming needed.**
+  Install `DietrichGebert/ponytail` upstream and leave the wrapper alone. **RESOLVED.**
+- **`push-to-git`** — its bundle-orphan gate was obsolete; replaced with `validate.py`.
+  The "why this gate exists" story is preserved, extended to explain how the failure
+  changed shape rather than disappearing. **RESOLVED.**
+
+### Still open
+
 - **Untested:** whether a local-path marketplace re-reads each session or caches. If it
-  caches, the scheduled `git pull` needs a refresh step.
+  caches, the scheduled `git pull` needs a refresh step. Testable only after first install.
 
 ## 5. External skills cannot easily go universal
 

@@ -18,6 +18,8 @@ license: MIT
 metadata:
   tier: universal
   plugin: skill-core
+  upstream: "UditAkhourii/adhd (MIT) - skills/adhd/SKILL.md"
+  fork_status: "MANAGED FORK. Body tracks upstream; description deliberately broadened to business use. Re-sync quarterly per EXTERNALS.md - take upstream's body, never its description."
 ---
 
 # ADHD

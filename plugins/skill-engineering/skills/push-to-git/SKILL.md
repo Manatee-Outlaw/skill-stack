@@ -37,30 +37,34 @@ today's date.
 ### Step 1.5 — Skill registration gate (run before creating task.md)
 
 If this commit adds or renames ANY file under a skill directory
-(`engineering/`, `productivity/`, `enterprise/`, `creative/`, `improve-system/`),
-the push is NOT complete until that file is named in at least one bundle.
+a new skill was added, the push is NOT complete until `scripts/validate.py`
+passes.
 
 Check it mechanically, do not eyeball it:
 
 ```bash
-comm -23 \
-  <(find . -name '*.md' -not -path './bundles/*' -not -path './.git/*' | sed 's|^\./||' | sort) \
-  <(grep -ohE '[a-z0-9-]+/[a-z0-9.-]+\.md' bundles/*.md | sort -u)
+python3 scripts/validate.py
 ```
 
-Anything this prints — other than `legal-paralegal.md`, which is intentionally
-unbundled — is an ORPHAN. Stop and register it in the right bundle(s) first,
-then re-run the check and continue.
+It must print `PASS`. It enforces structure (SKILL.md present and correctly
+capitalised, name matching its folder, no duplicates), the account-store limits
+(name <=64, description <=1024 - a universal-tier skill over the cap silently
+fails to upload), and the portability gate (no project names, no absolute paths,
+no undeclared cloud coupling, no raw GitHub self-links).
 
-Registering means all four of: the numbered load list, the "what each skill
-does" description, the trigger line, and the "when to run" line. A file added to
-the load list but described nowhere is half-registered.
+Any error means stop and fix it before pushing.
 
-Why this gate exists: on 2026-07-24 `engineering/adhd.md` was committed and
-pushed correctly, but no bundle referenced it, so no session ever loaded it. It
-was then missed on a brainstorm request — the exact use case it was written for.
-Writing the file is half the job; publishing it is the other half. An unregistered
-skill fails silently and looks identical to one that loaded and didn't trigger.
+Why this gate exists: on 2026-07-24 `adhd` was committed and pushed correctly,
+but no bundle referenced it, so no session ever loaded it. It was then missed on
+a brainstorm request - the exact use case it was written for. Writing the file is
+half the job; publishing it is the other half.
+
+**The failure changed shape but did not go away.** Bundles are retired, so a
+skill can no longer fall off a load list. It can still be unreachable - by having
+a description too vague to match how anyone actually speaks. That failure is
+identical from the outside: a skill that never fires looks the same as one that
+loaded and was not relevant. `validate.py` catches the structural half;
+`skill-library-audit` Check 1 catches the reachability half. Neither is optional.
 
 ---
 
