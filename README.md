@@ -49,6 +49,37 @@ python3 scripts/validate.py
 Then upload the changed zips from `dist/` at claude.ai → Customize → Skills.
 `SKILL.md` sits at the zip root; nesting it in a folder makes the upload fail silently.
 
+## Operational gotchas
+
+**Never remove a marketplace to refresh it.**
+
+```
+claude plugin marketplace update skill-stack     # refresh - safe
+claude plugin marketplace remove skill-stack     # DESTRUCTIVE
+```
+
+Removing a marketplace from its last remaining scope **also uninstalls every plugin
+installed from it.** To pick up new work, always `update`. There is no reason to `remove`
+unless you are retiring the library.
+
+**Every slash command has a CLI form — prefix it with `claude`.**
+
+| Where | Command |
+|---|---|
+| PowerShell / terminal | `claude plugin marketplace add F:\Projects\skill-stack` |
+| Inside Claude Code, or Cowork chat | `/plugin marketplace add F:\Projects\skill-stack` |
+
+They are equivalent. `/plugin` typed at a shell prompt fails with
+`CommandNotFoundException` — the shell has no idea what it is.
+
+**The marketplace serves whatever is checked out.** A local-path marketplace reads the
+working tree in that folder, not GitHub. Check out an older branch there and it silently
+serves the old skills.
+
+**Verify, do not assume.** Installing is not loading. After installing, start a fresh
+session and confirm the skills are actually listed. A skill that failed to load is
+indistinguishable from one that loaded and did not trigger.
+
 ## Before every commit
 
 ```
