@@ -1,1 +1,5 @@
 dist/
+
+# upstream icon clones live beside this repo, never inside it
+refs-lucide/
+refs-phosphor/

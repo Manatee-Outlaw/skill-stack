@@ -108,6 +108,87 @@ if the bodies ever diverge, this stops being a managed fork and becomes an unman
 
 ---
 
+---
+
+## MCP connectors
+
+Connectors are not skills, but they are external dependencies this library leans on, and
+an unrecorded one is an invisible one.
+
+### The rule that decides everything
+
+**Add connectors at `claude.ai/customize/connectors`. Nowhere else.**
+
+One authorisation there reaches **all three surfaces** — claude.ai, Cowork, and Claude Code
+(which fetches account connectors on login). Adding the same server with `claude mcp add`
+instead gives you Claude Code on **that one machine**, and nothing else.
+
+⚠️ **Never do both.** A server added in Claude Code takes precedence over a claude.ai
+connector pointing at the same URL — the local entry silently shadows the connector, and
+`/mcp` lists the connector as hidden. If a connector seems dead, check for a local
+duplicate before re-authorising.
+
+### Current connectors
+
+| Connector | Status | Used by |
+|---|---|---|
+| **Notion** | ✅ account-level, verified live | lesson log, Hermes handoffs |
+| **Mobbin** | ⚠️ Claude Code only — see below | design reference for UI work |
+
+**Notion** — `claude.ai/customize/connectors`. Read/write tools both set to Always allow.
+Verified by calling `notion-get-users`, not by reading a status list.
+
+**Mobbin** — `https://api.mobbin.com/mcp`. Design pattern and screenshot reference for
+building responsive apps and sites; pairs with `icon-libraries` and the external
+`impeccable` plugin.
+
+Currently added via `claude mcp add mobbin --scope user`, which is why it reaches Claude
+Code but **not Cowork or claude.ai** — confirmed by searching the live tool registry in a
+Cowork session and finding no Mobbin tools.
+
+To make it universal:
+
+```
+claude mcp remove mobbin          # drop the local entry first, or it shadows the connector
+```
+
+then add `https://api.mobbin.com/mcp` as a custom connector at
+`claude.ai/customize/connectors`.
+
+### Diagnosing a connector
+
+1. **Call one of its tools.** A live call settles it; a warning list does not.
+2. **Check for a local duplicate** — `claude mcp list`. A Claude Code entry shadows the
+   account connector at the same URL.
+3. **Check the active auth** — `/status`. Connectors are fetched only under a claude.ai
+   subscription login. An `ANTHROPIC_API_KEY`, a third-party provider, or a profile
+   credential disables connector loading entirely, even after a previous `/login`.
+4. **`connected · session token rejected`** means the Claude Code login expired, not that
+   the connector needs re-authorising. Run `/login`, then reconnect from `/mcp`.
+
+**Beware the two-servers trap.** Installed plugins bundle their own MCP servers that
+duplicate account connectors — `plugin:productivity:notion`, `plugin:legal:slack`,
+`plugin:small-business:quickbooks` and others sit permanently on the needs-authentication
+notice. They are mostly redundant. Prefer the account connector; ignore or disable the
+plugin duplicates. This has already produced one wrong "Notion needs authorising" claim.
+
+---
+
+## Reference clones (not dependencies)
+
+`icon-libraries` ships generated name lists rather than icon files. The upstream clones
+live **beside** this repo and are gitignored:
+
+```
+F:\Projects\refs-lucide      git clone --depth 1 https://github.com/lucide-icons/lucide
+F:\Projects\refs-phosphor    git clone --depth 1 https://github.com/phosphor-icons/homepage
+```
+
+They exist only to regenerate the lists (procedure in the skill). Nothing at runtime reads
+them, and they must never be committed.
+
+---
+
 ## Rules
 
 1. **Never vendor.** Reference and pin. A local copy is a fork and must be declared here.

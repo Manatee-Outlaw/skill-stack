@@ -8,7 +8,7 @@ A project-agnostic skill library for Claude. Authored once in git, delivered to 
 .claude-plugin/marketplace.json   marketplace definition
 plugins/skill-core/               always-on disciplines + adhd  (install everywhere)
 plugins/skill-engineering/        code, architecture, security, release
-plugins/skill-creative/           design, generative art, theming
+plugins/skill-creative/           design, generative art, theming, icon libraries
 plugins/skill-productivity/       planning, coaching, decisions
 plugins/skill-enterprise/         brand, comms, legal
 scripts/validate.py               run before every commit
@@ -22,7 +22,7 @@ Each skill is a folder containing `SKILL.md`. Capitalisation is significant.
 
 | Tier | Where it lives | Reaches | Updates |
 |---|---|---|---|
-| **universal** (23) | claude.ai account store | any device, incl. tablets | manual zip upload |
+| **universal** (24) | claude.ai account store | any device, incl. tablets | manual zip upload |
 | **machine** (25) | this repo, as plugins | Claude Code / Cowork | scheduled `git pull` |
 
 Tier is recorded per skill in `metadata.tier`. The universal tier exists because plugins

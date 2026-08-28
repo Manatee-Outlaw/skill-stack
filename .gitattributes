@@ -1,0 +1,19 @@
+# Normalise line endings so Windows and Linux stop disagreeing.
+#
+# Without this, a checkout on Windows writes CRLF while the repo stores LF, and every
+# file shows as modified with N insertions / N deletions — real changes then hide inside
+# thousands of lines of phantom diff.
+#
+# text=auto  : git decides what is text and stores it as LF in the repository
+# eol=lf     : check text files out as LF on every platform, Windows included
+#
+# LF is correct here regardless of OS: SKILL.md files are read by Claude, and the shell
+# scripts in scripts/ require LF to run at all.
+
+* text=auto eol=lf
+
+# Never touch these
+*.zip binary
+*.png binary
+*.jpg binary
+*.svg text eol=lf
