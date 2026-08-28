@@ -69,6 +69,32 @@ That churn is exactly why it is pinned here rather than copied.
 
 ---
 
+## Deliberately NOT in this library — Anthropic built-ins
+
+`algorithmic-art`, `canvas-design`, `theme-factory` were removed from `skill-creative`
+because **Anthropic ships them as built-in skills** and its versions are materially better.
+
+The decision was made on evidence, not preference. Anthropic's versions carry substantial
+bundled assets; the local rewrites were prose only:
+
+| Skill | Anthropic ships | The local version had |
+|---|---|---|
+| `algorithmic-art` | `templates/generator_template.js`, `templates/viewer.html` | SKILL.md only |
+| `canvas-design` | ~40 real font files (.ttf) plus licences, in `canvas-fonts/` | SKILL.md only |
+| `theme-factory` | `themes/` — 10 named theme definitions + `theme-showcase.pdf` | SKILL.md only |
+
+The clincher: Anthropic's `algorithmic-art` instructs **"STEP 0: READ THE TEMPLATE FIRST"**.
+The local version had no template, so that instruction pointed at nothing. `canvas-design`
+without the fonts cannot use the typography it describes.
+
+**Do not re-add them.** They are available automatically as built-ins, they update with
+Claude, and a local copy would both collide on name and be worse. If a genuine house rule
+is ever needed on top, write a thin wrapper under a **different** name — the `ponytail-audit`
+pattern — never a competing copy.
+
+A name collision here is not cosmetic: the account store holds one skill per name, and
+Claude Code will not load a local skill beside a synced one of the same name.
+
 ## Managed fork
 
 ### adhd
