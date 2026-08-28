@@ -68,6 +68,38 @@ loaded and was not relevant. `validate.py` catches the structural half;
 
 ---
 
+### Step 1.6 — Diff-intent gate (run before every commit, not just skill commits)
+
+**The commit message states an intent. Prove the staged diff matches it before committing.**
+
+```bash
+git status --short
+git diff --cached --stat
+```
+
+Read the shape, not the filenames. A commit message that says something was **removed**
+must show deletions and few or no insertions. One that says a file was **added** must show
+a new file mode. If the message and the stat disagree, **stop** — the working tree is not
+in the state the message describes, and committing will publish something nobody reviewed.
+
+Do not proceed on the assumption that a preceding cleanup command succeeded. Verify the
+tree, because a command that failed and a command that succeeded leave identical-looking
+prompts.
+
+Why this gate exists: a folder was to be deleted from a public repository because its
+contents had been reclassified as private. The delete command was issued in the wrong
+shell dialect, errored, and left the folder in place. `git add -A` then staged an
+unrelated pending edit, and the commit was made with the message *"move to the private
+set"*. The stat read `2 files changed, 155 insertions(+), 56 deletions(-)` — insertions,
+for a commit that claimed to remove something. Nobody read it. The push published the
+private content to a public repository, and the commit message actively concealed that,
+because it described the intended outcome rather than the actual change.
+
+The stat line was correct, visible, and free. It was simply never compared against the
+sentence sitting directly above it.
+
+---
+
 ### Step 2 — Create task.md
 
 Use bash_tool to create `/mnt/user-data/outputs/task.md` with the following content,

@@ -9,7 +9,10 @@ description: >
   file, instruction set, or work order to an implementer. Also trigger on the
   receiving side: an implementer reading a task.md that lacks an assumptions
   block, or that specifies a mechanism the author could not have verified,
-  must say so and proceed by the goal rather than silently complying.
+  must say so and proceed by the goal rather than silently complying. Applies
+  equally to any literal command handed to a human operator to paste: name the
+  machine they should be sitting at, state what output proves it worked, and
+  confirm host identity against current documentation before naming a host.
 metadata:
   tier: universal
   plugin: skill-engineering
@@ -154,6 +157,46 @@ than after implementation.
 
 The temptation to skip discovery is strongest under time pressure. That is
 exactly when it pays.
+
+## Rule 6 — A command handed to a person is a task file too
+
+Every literal command given to a human operator to paste is a MECHANISM specified in a
+domain the author cannot see: their shell dialect, their OS, their PATH, their SSH config,
+their host inventory, which machine they are sitting at right now. Rule 2 applies in full.
+
+**Before giving any command, three things are mandatory:**
+
+1. **Name the machine.** "From PowerShell on your desktop", "in the browser console on the
+   production host". A command with no stated origin is unrunnable by anyone who does not
+   already know the answer — and a person who already knew would not need the command.
+2. **State what proves it worked.** The expected output, or the observable change. Without
+   it the operator cannot distinguish success from silent failure, and neither can you when
+   they paste the result back.
+3. **Verify host identity against the project's own current-state document**, not against
+   memory or an older report. Infrastructure gets migrated. A host named correctly in a
+   document written six weeks ago may be decommissioned, repurposed, or — worse — kept
+   running as a warm rollback asset, where operating on it looks exactly like success.
+
+**Do not infer a machine's health from a signal that does not touch it.** A public URL
+responding proves the thing serving that URL is up. Behind a CDN, a tunnel, a load
+balancer or a proxy, that is not necessarily the machine in question. Name what the signal
+actually measured before drawing a conclusion from it.
+
+**When the operator is not an engineer, a wrong command costs more than no command.** They
+cannot distinguish "wrong syntax for my shell" from "the system is broken", so a failed
+command reads as a failed system. Worse, a silently failed command followed by a
+successful-looking next one produces exactly the class of damage `push-to-git` Step 1.6
+exists to catch: the cleanup that did not happen, followed by the commit that claimed it
+did.
+
+Two corollaries:
+
+- **Prefer the route with no prerequisites** when their machine's configuration is
+  unverifiable. A browser console that needs no keys beats an SSH command that assumes a
+  config entry you have never seen.
+- **Do the work yourself where you can, and say plainly where you cannot.** "I tested
+  whether I could reach it and I cannot" is a real answer. Handing over a command while
+  implying it is routine, when it depends on setup you never confirmed, is not.
 
 ## The check, before sending any task
 
