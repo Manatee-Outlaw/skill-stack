@@ -28,16 +28,62 @@ Each skill is a folder containing `SKILL.md`. Capitalisation is significant.
 Tier is recorded per skill in `metadata.tier`. The universal tier exists because plugins
 cannot reach a device with no filesystem.
 
-## Install (machine tier)
+## Install (machine tier) — depends on the machine's role
+
+Machines have one of two roles. **Pick the wrong one and the marketplace breaks**, because a
+local path only exists on the machine that has that drive.
+
+### Authoring machine — where you edit skills
+
+One clone, marketplace sourced from it:
 
 ```
-/plugin marketplace add F:\Projects\skill-stack
-/plugin install skill-core@skill-stack
-/plugin install skill-engineering@skill-stack
+claude plugin marketplace add F:\Projects\skill-stack
+claude plugin install skill-core@skill-stack
+claude plugin install skill-engineering@skill-stack
 ```
 
-Local path, not the GitHub URL — that makes `git pull` the update mechanism, so a scheduled
-pull keeps every machine current with no command to remember.
+The local path means an edit is live immediately — you can test a change before pushing.
+Refresh with `scripts\sync.bat` (pull + validate + marketplace update).
+
+Also install the private set here, if this is the machine that holds it:
+
+```
+claude plugin marketplace add F:\Projects\skill-stack-private
+claude plugin install skill-private@skill-stack-private
+```
+
+### Consuming machine — laptop, work PC, anywhere else
+
+**No clone. No drive letter. Source from GitHub:**
+
+```
+claude plugin marketplace add Manatee-Outlaw/skill-stack
+claude plugin install skill-core@skill-stack
+claude plugin install skill-engineering@skill-stack
+claude plugin install skill-creative@skill-stack
+claude plugin install skill-productivity@skill-stack
+claude plugin install skill-enterprise@skill-stack
+```
+
+Refresh with `claude plugin marketplace update skill-stack`. Nothing else needed — no git,
+no `sync.bat`, no repo on disk.
+
+The **universal tier needs no install anywhere.** Those skills live in the claude.ai account
+and follow your login, which is the entire reason that tier exists.
+
+### Why not just use the GitHub source everywhere?
+
+You could, and on a consuming machine you should. The local path buys exactly one thing:
+uncommitted edits are live, so you can test before pushing. That is worth a clone on the
+machine where you author and worth nothing anywhere else.
+
+### The private set is machine-bound, deliberately
+
+`skill-stack-private` is a plain local folder with no git and no cloud copy — the material
+is too sensitive for either. It therefore exists only on the machine it was built on. To use
+it elsewhere, copy the folder by hand (USB or local network) and add that machine's path.
+There is no sync, and that is the intended trade.
 
 ## Publish (universal tier)
 
