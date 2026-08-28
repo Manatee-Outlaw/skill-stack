@@ -2,11 +2,13 @@
 name: improve-system
 trigger: /improve-system
 description: >
-  Reviews the current session and updates the Claude Skills system to reflect what happened.
-  Updates skill files when outputs were iterated. Saves experiences and lessons to
-  knowledge/me/experiences/. Flags stale or duplicated content. Always updates the README
-  if anything changed.
-last_updated: 2026-05-31
+  Reviews the current session and updates the skill library to reflect what happened.
+  Edits skill files in place when their output was iterated or corrected, and records
+  durable lessons, corrections and preferences to the Notion Lesson Log so a future
+  session inherits them. Flags stale or duplicated content. Run at the end of any session
+  where something meaningful was built, iterated, or learned. Trigger phrases:
+  "/improve-system", "improve the system", "what did we learn", "save that lesson",
+  "update the skills with this".
 metadata:
   tier: machine
   plugin: skill-engineering
@@ -14,9 +16,12 @@ metadata:
 
 # Improve System
 
-This skill runs a structured review of the current session and makes targeted updates to
-the Claude Skills folder in Google Drive. Run it at the end of any session where something
-meaningful was built, iterated, or learned.
+Runs a structured review of the current session and makes targeted updates in two places:
+
+- **Skills** — in the git repo, edited IN PLACE.
+- **Lessons** — in the Notion **Lesson Log**, one page per lesson, edited in place.
+
+Run it at the end of any session where something meaningful was built, iterated, or learned.
 
 ---
 
@@ -39,11 +44,13 @@ Read back through the full conversation. For each meaningful event, classify it:
 
 | What happened | Category | Action |
 |---|---|---|
-| A skill's output was iterated or corrected | Skill update | Rewrite the affected section(s) with version increment |
-| User shared a story, lesson, or hard-won insight | Experience | Save to knowledge/me/experiences/ |
-| A file path, description, or reference is wrong or outdated | Stale | Flag for user to delete or fix |
+| A skill's output was iterated or corrected | Skill update | Edit the affected section(s) in place |
+| User shared a story, lesson, or hard-won insight | Lesson · `experience` | New page in the Lesson Log |
+| Claude got something wrong and was corrected | Lesson · `correction` | New page in the Lesson Log |
+| A new preference, working style, or constraint was revealed | Lesson · `preference` | New page in the Lesson Log |
+| A better way of doing a recurring task emerged | Lesson · `process` | New page in the Lesson Log |
+| A file path, description, or reference is wrong or outdated | Stale | Flag for the user to fix |
 | Two files or sections contain overlapping content | Duplicate | Flag and propose consolidation |
-| A new preference, working style, or constraint was revealed | User context | Save to knowledge/me/ |
 | A new skill or file was created | System change | Update README |
 
 Only save things with durable value — a lesson the user would want to reference in 6 months.
@@ -55,44 +62,61 @@ Do not treat casual back-and-forth as an experience.
 
 If a skill produced output that the user pushed back on, corrected, or significantly changed:
 
-1. Identify what was wrong or incomplete in the original instructions
-2. Rewrite only the affected section(s) — full rewrites only if the issue is structural
-3. Version the file. NOTE: this `-vN.N` filename convention applies ONLY to skills that
-   live in Google Drive (which cannot edit files in place). Skills in the public git repo
-   are edited IN PLACE with NO suffix — git history is their version log (see
-   verify-before-versioning). For a Drive skill:
-   - First update to any skill: add `-v1.1` before `.md` (e.g. `diagnose-v1.1.md`)
-   - Subsequent updates: increment minor version (`-v1.2`, `-v1.3`)
-   - Major rework: bump major version (`-v2.0`)
-4. Save to the same folder as the original (Drive); for a repo skill, edit in place and commit
-5. Report: "Updated [skill name] → [new version] — [what changed and why]"
+1. Read the current file first — never edit from memory (`verify-before-versioning`)
+2. Identify what was wrong or incomplete in the original instructions
+3. Rewrite only the affected section(s) — full rewrites only if the issue is structural
+4. **Edit IN PLACE. Never add a version suffix.** Git history is the version log. The old
+   `-vN.N` convention is retired everywhere: it existed only because the previous cloud
+   store could not edit a file in place, and a renamed skill folder breaks its identity so
+   the plugin stops resolving it.
+5. Run `python scripts/validate.py` before committing
+6. Report: "Updated [skill] — [what changed and why]"
 
 ---
 
-### Step 3 — Experiences
+### Step 3 — Lessons
 
-If the user shared a lesson, story, or experience worth preserving:
+If something durable was learned, record it in the Notion **Lesson Log**.
 
-1. Save to `Claude Skills/knowledge/me/experiences/`
-2. Use this format:
+**Database:** `collection://80765770-d23c-46b3-92e4-2ada2cf078fc`
+(under the *Claude Skill Stack* page)
+
+**First: check whether this lesson already exists.** Query the database before creating.
+If a page covers the same ground, **update it in place** — do not create a near-duplicate.
+That is the whole reason this lives in Notion rather than dated files.
+
+**Properties**
+
+| Property | Value |
+|---|---|
+| `Lesson` | Short imperative title — the takeaway, not the anecdote |
+| `Type` | `experience` · `correction` · `preference` · `process` · `context` |
+| `Learned` | Today's date |
+| `Source` | The project or session that produced it |
+| `Applies to` | `skills` · `engineering` · `writing` · `business` · `workflow` · `general` |
+| `Status` | `active` |
+
+**Page body**
 
 ```
-# Experience: [Short title]
-Date: [YYYY-MM-DD]
-Context: [What situation produced this — 1 sentence]
-
 ## What happened
-[2–4 sentences. Factual. What did they do, decide, or observe?]
+[2-4 sentences. Factual. What was done, decided, or observed?]
 
 ## The lesson
-[1–2 sentences. What's the durable takeaway?]
+[1-2 sentences. The durable takeaway, stated as guidance.]
 
-## Tags
-[2–4 keywords: e.g., sales, agency, systems, decision-making]
+## Why it matters
+[1-2 sentences. What goes wrong if this is forgotten?]
 ```
 
-3. Filename: `[YYYY-MM-DD]-[short-title].md`
-4. Report: "Saved experience: [title] → knowledge/me/experiences/[filename]"
+**Superseding.** When a later lesson replaces an earlier one, set the old page's `Status`
+to `superseded` and link the new one. **Do not delete it** — the reasoning is the record,
+and knowing a rule was reconsidered is worth more than a tidy list.
+
+Report: "Logged lesson: [title] → Notion Lesson Log".
+
+Only record things with durable value — something worth referencing in six months. Casual
+back-and-forth is not a lesson.
 
 ---
 
@@ -126,11 +150,11 @@ End with a clean summary in this format:
 ```
 ## /improve-system complete
 
-**Updated skills:**
-- [Skill name] → [new version] — [what changed]
+**Updated skills:** (edited in place, no version suffixes)
+- [Skill name] — [what changed and why]
 
-**Saved experiences:**
-- [Title] → knowledge/me/experiences/[filename]
+**Logged lessons:**
+- [Title] — [type] — new page / updated existing
 
 **Flagged for cleanup:**
 - 🚩 [File] in [location] — [issue] — [recommended action]

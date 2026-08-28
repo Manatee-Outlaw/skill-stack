@@ -1,16 +1,30 @@
 ---
 name: hermes-upload
-description: Generate a structured handoff document from the current conversation and upload it to Google Drive. Trigger immediately when the user says "hermes upload" — do not ask for clarification, proceed through all steps. Creates a versioned plain text file in the "Hermes Handoffs" Drive folder, auto-incrementing the version number (v1, v2, v3, etc.) based on files already in the folder with the same chat name. Every number in the handoff must carry its provenance — sample or population, measured or estimated, and by whom — because a figure that loses its denominator in a handoff becomes a false statistic in the next session, which has no way to see the qualifier was ever there. Also use this skill when the user says "export to hermes", "send to hermes", or "hermes handoff".
+description: >
+  Generate a structured handoff document from the current conversation and write it to the
+  Notion Hermes Handoffs database so the next session resumes with full context. Trigger
+  immediately on "hermes upload" — do not ask for clarification, proceed through all steps.
+  One page per chat, keyed on the exact chat title and updated in place; never create a
+  second page or a version suffix for a chat that already has one. Every number in the
+  handoff must carry its provenance — sample or population, measured or estimated, and by
+  whom — because a figure that loses its denominator becomes a false statistic in the next
+  session, which has no way to see the qualifier was ever there. Also triggers on
+  "export to hermes", "send to hermes", "hermes handoff".
 metadata:
   tier: universal
   plugin: skill-engineering
-  portability_exempt:
-    drive-ref: "Google Drive is this skill's delivery target until the Notion port (KNOWN-ISSUES 3)."
 ---
 
 # Hermes Upload
 
-Generates a structured handoff document so the next session can resume with full context, then uploads it to Google Drive with auto-versioned naming tied to the exact chat title.
+Generates a structured handoff document so the next session can resume with full context,
+then writes it to the Notion **Hermes Handoffs** database — one page per chat, keyed on the
+exact chat title, edited in place.
+
+**Notion, not the old cloud folder.** A handoff exists to be read on the *next* device,
+which is often a laptop or tablet. The previous destination was unreachable there, and its
+inability to edit a file in place forced the `v1`/`v2`/`v3` sprawl this skill used to
+generate.
 
 ## Trigger
 `hermes upload`
@@ -84,70 +98,83 @@ Use the **exact title of the current Claude chat conversation** as the file name
   - Chat titled "Q3 Analytics Dashboard" → use `Q3 Analytics Dashboard`
 - If you are uncertain of the exact chat title, ask the user before proceeding.
 
-This ensures that all handoffs from the same chat session share a consistent naming series
-(v1, v2, v3...) and are never mixed with handoffs from a differently-titled chat.
+The chat title is the **key**. One chat means one page, updated — not a new page each time.
 
 ---
 
-### Step 3 — Find or Create the "Hermes Handoffs" Folder
+### Step 3 — Find the existing handoff page
 
-Search Google Drive for a folder named exactly **Hermes Handoffs**.
+The destination is the Notion **Hermes Handoffs** database:
 
-- **Found**: note its folder ID and proceed.
-- **Not found**: create it with `Google Drive:create_file` using:
-  - name: `Hermes Handoffs`
-  - mimeType: `application/vnd.google-apps.folder`
+`collection://0a0836e0-289d-4398-9168-52bfca8f4a70`
+(under the *Claude Skill Stack* page)
 
-If a Hermes Handoffs folder ID is already configured for this project, use it
-directly instead of searching: <drive-folder-id>
+Query it for a page whose `Chat` property matches the exact chat title from Step 2.
 
----
+- **Found** → Step 4a: update it.
+- **Not found** → Step 4b: create it.
 
-### Step 4 — Determine the Version Number
-
-Search the Hermes Handoffs folder for files whose names begin with the exact chat name from Step 2.
-
-- **No matches**: assign **v1**
-- **Matches found**: read the version numbers in their filenames, take the highest, and increment by 1
+**Do not create a second page for a chat that already has one.** No `v2`, no "(updated)",
+no date appended to the title. That convention existed only because the previous cloud
+store could not edit a file in place. Notion can, and page history keeps the record.
 
 ---
 
-### Step 5 — Upload the File
+### Step 4a — Update the existing page
 
-Create a new plain text file in the Hermes Handoffs folder:
+Replace the page body with the current handoff document. Refresh:
 
-- **Filename**: `[Chat Name] v[N]`
-  - Example: `Payments API Refactor v3`
-- **Content**: the handoff document from Step 1
-- **Format**: plain text
-- **Important**: set `disableConversionToGoogleType: true` to prevent Drive from
-  converting to Google Docs format
+| Property | Value |
+|---|---|
+| `Status` | `active` · `complete` · `stalled` · `abandoned` |
+| `Next step` | The single most useful line for a future session |
+| `Project` | If it changed |
 
-Use `Google Drive:create_file`.
+`Updated` maintains itself. Previous states remain in Notion's page history — nothing is
+lost by editing in place.
+
+### Step 4b — Create a new page
+
+| Property | Value |
+|---|---|
+| `Chat` | The exact chat title — never derived, shortened, or invented |
+| `Project` | The project or repo this belongs to |
+| `Status` | Usually `active` |
+| `Next step` | The single most useful line for a future session |
+
+Page body: the handoff document from Step 1.
 
 ---
 
-### Step 6 — Confirm to User
+### Step 5 — Confirm to the user
 
-After a successful upload, report:
-- The exact filename uploaded
-- The Drive folder it lives in (Hermes Handoffs)
-- The version number assigned
-- One sentence summarizing what the next session will find when it opens the file
+Report:
+- The chat title used as the key
+- Whether a page was **created** or **updated**
+- The `Next step` recorded
+- One sentence on what the next session will find
+
+Include the page URL so it can be opened from any device — a handoff you cannot read on
+the machine you are picking up on has failed at its only job.
 
 ---
 
 ## Error Handling
 
-- **Drive not connected or auth error**: display the handoff document in chat, tell the user Drive isn't reachable, and ask them to check the Google Drive connector in Settings.
-- **Folder creation fails**: report the error and show the document in chat so nothing is lost.
-- **Version detection returns no results**: default to v1 and note this assumption in the confirmation message.
-- **Chat title uncertain**: ask the user for the exact chat title before uploading. Never guess.
+- **Notion not reachable**: display the full handoff document in chat, say Notion could not
+  be reached, and point at the connector in claude.ai settings. **Never fail silently** —
+  the document in chat is better than no handoff.
+- **Multiple pages match the same chat title**: do not guess. Report them and ask which is
+  canonical. Duplicates are the exact failure this design removes; finding one means the
+  rule was broken earlier and needs fixing rather than compounding.
+- **Chat title uncertain**: ask. Never guess — a wrong key silently splits a chat's history
+  into two pages.
 
 ## Hard Rules
 
 - Always use the exact chat title — never derive, shorten, or invent a name.
-- Always run version detection before assigning a number — never assume v1 without checking.
-- Never skip the upload — if something fails, show the document in chat rather than silently failing.
+- **Always search before writing.** One chat, one page, updated in place. No version
+  suffixes, ever.
+- Never skip the write — if something fails, show the document in chat rather than silently failing.
 - The handoff document must be written as if the next session is reading a cold brief with no prior context.
 - Never write a bare number. Every figure carries sample-or-population, measured-or-estimated, and by whom. A denominator dropped in a handoff never comes back — the next reader cannot miss what they cannot see was removed.

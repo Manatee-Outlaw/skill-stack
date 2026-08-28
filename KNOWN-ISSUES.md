@@ -13,32 +13,32 @@ redundancy, coverage gaps.
 The `comprehensive-audit` AUDIT SKILLS list is the one place the old dead-link check still
 genuinely applies, and Check 4 covers it.
 
-## 2. `improve-system` — needs the Notion lesson log
+## 2. ~~`improve-system`~~ — RESOLVED
 
-Writes lessons to `knowledge/me/experiences/` in Google Drive. Target is a Notion database,
-one page per lesson, edited in place. Blocked on creating that database.
+Repointed to the Notion **Lesson Log** — `collection://80765770-d23c-46b3-92e4-2ada2cf078fc`,
+under the *Claude Skill Stack* page. One page per lesson, edited in place, with a
+`superseded` status so a replaced lesson is retained rather than deleted (the reasoning is
+the record). The `-vN.N` skill-versioning branch is gone; every skill is edited in place now.
 
-Notion is already connected at account level — no authorisation needed.
+## 3. ~~`hermes-upload`~~ — RESOLVED
 
-## 3. `hermes-upload` — repoint to Notion
+Repointed to the Notion **Hermes Handoffs** database —
+`collection://0a0836e0-289d-4398-9168-52bfca8f4a70`. One page per chat, keyed on the exact
+chat title, **searched before writing** and updated in place. The `v1`/`v2`/`v3`
+auto-increment and the hardcoded folder ID are both gone.
 
-Currently uploads handoffs to Google Drive with `v1`/`v2`/`v3` auto-increment and a
-hardcoded folder ID. Both are the sprawl this architecture removes, and Drive is
-unreachable from a tablet — which defeats a handoff's whole purpose.
-
-Target: one Notion page per chat title, edited in place, page history as the version log.
-
-**Preserve verbatim** on port — the best line in the skill:
+The provenance rule survived verbatim, as required:
 
 > Every number in the handoff must carry its provenance — sample or population, measured or
-> estimated, and by whom — because a figure that loses its denominator in a handoff becomes
-> a false statistic in the next session, which has no way to see the qualifier was ever there.
+> estimated, and by whom — because a figure that loses its denominator becomes a false
+> statistic in the next session, which has no way to see the qualifier was ever there.
 
-Keep the existing fallback: if the connector is unreachable, print the handoff in chat
-rather than failing silently.
+Fallback preserved: if Notion is unreachable, print the handoff in chat rather than failing
+silently. Added a failure mode that did not exist before — if two pages match the same chat
+title, report and ask rather than guessing, because a duplicate means the one-page rule was
+already broken and guessing compounds it.
 
-*(Exempted in `validate.py`'s allowlist meanwhile, since Drive is legitimately its
-destination until the port.)*
+Its portability exemption was removed; it no longer needs one.
 
 ## 4. ~~Unresolved from planning~~ — mostly RESOLVED
 
