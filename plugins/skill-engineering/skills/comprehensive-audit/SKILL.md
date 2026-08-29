@@ -2,15 +2,16 @@
 name: comprehensive-audit
 description: >
   Generates and dispatches the full engineering audit for Claude Code using
-  concurrent subagents — one dedicated subagent per skill, all running
-  simultaneously. Futureproofed: every skill in the AUDIT SKILLS list below
-  automatically receives its own dedicated subagent. To add a new audit skill,
-  append it to the list — no other changes needed. Every subagent
-  automatically applies the full set of GOVERNING STANDARDS below to every
-  finding it produces — this is baked into the skill itself, not something
-  that has to be manually re-specified each time this skill is triggered.
-  Trigger immediately when the user says "comprehensive audit", "full audit",
-  "the full works", "run all the audits", or "audit everything".
+  concurrent subagents — one per skill in the AUDIT SKILLS list below, all
+  running simultaneously, each automatically applying the full GOVERNING
+  STANDARDS set to every finding it produces.
+  Trigger immediately on "comprehensive audit", "full audit", "the full works",
+  "run all the audits", "audit everything" — and ALSO on the bare, unqualified
+  asks: "audit my code", "code audit", "code review", "run an audit", "check the
+  codebase", "review the code". Those generic phrasings belong to THIS skill, not
+  to its components: engineering-review, holistic-code-audit and
+  architecture-review are dispatched BY this audit, and firing one alone in answer
+  to a generic request gives a fraction of the coverage while looking complete.
   Never run a partial audit when this skill triggers.
 metadata:
   tier: machine

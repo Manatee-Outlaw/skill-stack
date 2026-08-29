@@ -1,14 +1,19 @@
 ---
 name: holistic-code-audit
 description: >
-  Run a multi-discipline code audit covering logic, failure modes, security, race
-  conditions, edge cases, integration seams, state consistency, environment, and
-  placeholder provenance.
-  Use immediately when the user asks for a "code review", "audit", "check my code",
-  "review the code", "code audit", or "debugging session" — and also after making
-  fixes, to verify no new issues were introduced. Run before pushing any significant
-  change. This is the most comprehensive in-chat audit skill — if in doubt, run it.
-  For a deeper Claude Code audit via task.md, use engineering-review instead.
+  Sweep a codebase for CORRECTNESS across nine disciplines, in chat — logic,
+  failure modes, security, race conditions, edge cases, integration seams, state
+  consistency, environment, and placeholder provenance. Asks "is this right under
+  conditions nobody tried", not "does it contain known bug shapes".
+  Trigger on "review this for correctness", "check for race conditions", "edge
+  case review", "failure mode review", "what breaks under load" — and after making
+  fixes, to verify nothing new was introduced. Run before pushing a significant
+  change.
+  Do NOT trigger on a bare "audit", "code audit", "code review" or "check my code"
+  — those belong to comprehensive-audit, which dispatches this skill as one of its
+  subagents. Use this directly when the nine-discipline correctness sweep is what
+  is wanted. For specific defect classes via Claude Code, use engineering-review;
+  for structure, architecture-review.
 metadata:
   tier: machine
   plugin: skill-engineering

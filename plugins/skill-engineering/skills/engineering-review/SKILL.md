@@ -1,13 +1,17 @@
 ---
 name: engineering-review
 description: >
-  Run a full 8-check engineering audit of your codebase via Claude Code.
-  Catches database association errors, undefined variables, token limits, silent
-  failures, auth gaps, missing routes, dead code, and git hygiene issues. Trigger
-  immediately when the user says "engineering review", "code audit", "run audit",
-  "bug hunt", or "check the codebase". For an in-chat audit without Claude Code,
-  use holistic-code-audit instead. For the full comprehensive audit,
-  use comprehensive-audit.
+  Hunt SPECIFIC DEFECT CLASSES in a codebase via Claude Code — database
+  association errors, undefined variables, token limits, silent failures, auth
+  gaps, missing routes, dead code, and git hygiene. An 8-check sweep for concrete
+  bugs, not a structural or correctness review.
+  Trigger on "engineering review", "bug hunt", "find bugs in the codebase",
+  "undefined variables", "silent failures", "dead code".
+  Do NOT trigger on a bare "audit", "code audit", "run an audit" or "check the
+  codebase" — those belong to comprehensive-audit, which dispatches this skill as
+  one of its subagents. Use this directly only when this defect-class sweep is
+  what is actually wanted. For the nine-discipline correctness sweep in chat, use
+  holistic-code-audit; for structure, architecture-review.
 metadata:
   tier: machine
   plugin: skill-engineering

@@ -1,14 +1,17 @@
 ---
 name: architecture-review
 description: >
-  Run a structural architecture review of your codebase via Claude Code.
-  Finds async/sync mismatches, duplicated logic, god functions, missing abstractions,
-  coupling problems, and single points of failure. Different from engineering-review
-  (which finds bugs) — this finds structural problems before they compound. Different
-  from improve-codebase-architecture (which is interactive exploration in chat) — this
-  produces a full structured report via Claude Code. Run quarterly or before major
-  feature builds. Trigger on "architecture review", "structural review", "code structure
-  check", "find bottlenecks", "deep architecture audit".
+  Review how a codebase is STRUCTURED, via Claude Code — async/sync mismatches,
+  duplicated logic, god functions, missing abstractions, coupling problems, and
+  single points of failure. Finds structural problems before they compound, rather
+  than bugs that already exist (engineering-review) or correctness holes
+  (holistic-code-audit). Different from improve-codebase-architecture, which is
+  interactive exploration in chat — this produces a full structured report.
+  Run quarterly or before major feature builds.
+  Trigger on "architecture review", "structural review", "code structure check",
+  "find bottlenecks", "god functions", "coupling", "deep architecture audit".
+  Do NOT trigger on a bare "audit" or "code audit" — those belong to
+  comprehensive-audit, which dispatches this skill as one of its subagents.
 metadata:
   tier: machine
   plugin: skill-engineering
