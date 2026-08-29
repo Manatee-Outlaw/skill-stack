@@ -131,6 +131,26 @@ mention of it.
 
 ---
 
+## Step 0 — Run the test suite BEFORE looking for anything new
+
+Find the project's test suite and run it. Report the pass/fail/skip counts as the
+first line of the audit, before any finding.
+
+If there is no runner, that is the first finding — write it up and say how many test
+files exist with nothing executing them.
+
+If the suite is red, or will not run at all, **say so at the top and treat every
+other finding as provisional.** An audit that reports fresh findings while the
+existing gates are broken is measuring the wrong thing: it discovers new problems
+while the ones already caught sit unnoticed.
+
+Do not accept a green result you did not watch execute. "There are tests" is not
+evidence; an exit code is. A suite that cannot run on the machine you are auditing
+from has been proving nothing for as long as that has been true — and the longer a
+project has gone without this check, the more likely that is the actual finding.
+
+---
+
 ## Step 1 — Confirm scope before generating
 
 Ask the user two quick questions:

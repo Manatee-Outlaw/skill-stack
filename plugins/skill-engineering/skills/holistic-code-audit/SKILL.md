@@ -31,6 +31,21 @@ fragments. Never audit while fixing. Audit first, fix second.
 
 ---
 
+## Step 0 — Run the test suite before any discipline
+
+Before discipline 1, find the project's test suite and run it. Report pass/fail/skip
+as the first line of the audit.
+
+No runner is itself the finding — write it up, and say how many test files exist with
+nothing executing them. A red or unrunnable suite goes at the top, and every other
+finding below it is provisional: reporting new problems while the existing gates are
+broken measures the wrong thing.
+
+Do not accept a green you did not watch execute. "There are tests" is not evidence;
+an exit code is.
+
+---
+
 ## The 9 Audit Disciplines
 
 Run all of them on every audit. Don't skip disciplines because the codebase "looks fine."
