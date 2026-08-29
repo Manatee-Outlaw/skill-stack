@@ -7,6 +7,68 @@ Re-check this file quarterly, or whenever an external skill misbehaves.
 
 ---
 
+## Where each skill lives, and where it follows you
+
+A skill is not "installed" in one place. There are **five delivery paths**, they reach
+different surfaces, and only one of them follows your login. Before asking *"why can't
+Claude see this skill"*, work out which path it took.
+
+| Path | Where it lives | Reaches | Refreshed by |
+|---|---|---|---|
+| **Account store** | claude.ai → Customize → Skills | **everywhere** — web, mobile, Cowork, Claude Code | Re-upload by hand. `scripts/build-zips.sh` builds the per-skill zips (universal tier only). |
+| **Cowork bundle** | an installed `.plugin` file | **Cowork only** | `scripts/build-plugins.sh`, then re-install each bundle. Nothing else. |
+| **CLI marketplace** | `claude plugin marketplace add <path or repo>` | **Claude Code only** | `claude plugin marketplace update <name>`, or `scripts\sync.bat`. |
+| **Claude Code user skills** | `%USERPROFILE%\.claude\skills\<name>` | **Claude Code only** | Manual — re-clone or `git pull` in that folder. |
+| **Project scope** | `<project>\.agents\skills\<name>` | only agents whose working folder is that project | Manual. Narrowest scope available. |
+
+### The rule that decides everything
+
+**If a skill must reach a tablet or a phone, it has to be universal-tier and in the account
+store. There is no other path.** Everything else is a file on one computer.
+
+This mirrors the connector rule further down: one authorisation at claude.ai reaches all
+three surfaces; a local install reaches one machine.
+
+### Each path refreshes separately, and silence is not success
+
+The paths do **not** feed each other. Committing to the repo updates none of them. Each has
+its own build step and its own staleness, and a stale one reports no error — it serves old
+content confidently.
+
+> **2026-08-28 — the failure this section exists to prevent.** A skill was deleted from the
+> repo for carrying private material, and two others were materially rewritten. All of it
+> was committed and pushed. A fresh Cowork session loaded none of it and served the deleted
+> skill back as current, because Cowork reads `.plugin` bundles that had been built five
+> hours earlier and **nothing in the toolchain rebuilt them**. `sync.bat` reported "all
+> good" throughout — correctly, because it refreshes the CLI marketplace, which Cowork
+> never consults. `build-plugins.sh` was written that day to close the gap.
+
+Two behaviours worth knowing, both observed directly rather than assumed:
+
+- **Installing a `.plugin` bundle refreshes a live session.** The skills become available
+  immediately; no restart needed.
+- **A CLI marketplace update does not.** `marketplace update` returned ok and changed
+  nothing a running Cowork session could see.
+
+### Verifying, rather than hoping
+
+Ask a session to **read the actual file**, not to list names. A stale skill has the right
+name and the wrong content — the failure above was invisible to any check that stopped at
+the name:
+
+> *"List the skill-private skills you can see, then read the brand-guidelines SKILL.md you
+> have loaded and tell me whether it names the real brands or contains placeholders."*
+
+### Open questions — unverified, do not repeat as fact
+
+- **Does Cowork read `%USERPROFILE%\.claude\skills`?** Evidence says no: `unlazy` sits
+  there and has never appeared in a Cowork session. Not proven — that folder is outside
+  what a Cowork session can inspect, so the conclusion rests on absence.
+- **Why does `ponytail` show installed and enabled in the desktop Plugins panel while being
+  absent from a Cowork session's plugin set?** Possibly a per-surface toggle. Unresolved.
+
+---
+
 ## Installed as plugins (marketplace)
 
 ### impeccable
