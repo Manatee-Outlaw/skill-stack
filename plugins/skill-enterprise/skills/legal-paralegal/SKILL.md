@@ -13,6 +13,7 @@ jurisdiction: United States (federal + California/CCPA-aware by default)
 last_updated: 2026-05-27
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-enterprise
 ---
 

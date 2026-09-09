@@ -11,6 +11,7 @@ description: >
   deserve to know. Always ask about audience and urgency before drafting.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-engineering
 ---
 

@@ -11,6 +11,7 @@ description: >
   trigger phrase needed.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-core
 ---
 

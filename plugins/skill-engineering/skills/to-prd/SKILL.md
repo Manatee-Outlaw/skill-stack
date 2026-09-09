@@ -3,6 +3,7 @@ name: to-prd
 description: Turn the current conversation context into a structured PRD (Product Requirements Document). Use when the user wants to capture what's been discussed into a formal spec, says "write this up as a PRD", or wants to document a planned feature before building it. Does NOT re-interview the user — synthesises what's already been discussed.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-engineering
 ---
 

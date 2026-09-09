@@ -8,6 +8,7 @@ description: >
   fragility before they become bugs.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -128,6 +129,19 @@ Rate each dependency:
 ## Output format
 
 Produce a report with these sections:
+
+**evidence:** every finding carries one — the command run and its output, or the
+exact text quoted — tagged **[proven]** (ran it, read the result) or **[inferred]**
+(reasoned from what you read). A finding with an empty evidence line is a hypothesis.
+
+**An absence needs a negative check.** "Not tracked", "no caller", "nothing reads
+it", "no issues found" cannot quote offending text, which is exactly why they escape
+the rule above. Say where you searched and with what scope.
+
+**A proxy check is not a content check.** `ls` and `find` prove a file exists,
+`diff -q` proves bytes differ, `grep -c` and `grep -l` prove a match count — none
+prove what a file says. If your evidence line names one of those, the finding is
+[inferred] at best.
 
 ### SHARED INFRASTRUCTURE MAP
 List all shared resources with producer/consumer roles.

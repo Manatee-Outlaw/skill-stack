@@ -11,6 +11,7 @@ description: >
   "update the skills with this".
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -161,7 +162,17 @@ End with a clean summary in this format:
 
 **Reviewed, no changes needed:**
 - [Anything examined but found to be fine]
+  evidence: [what you actually opened or ran to conclude it was fine]
 ```
+
+**An absence needs a negative check.** "Reviewed, no changes needed" and
+"nothing in this session required a system update" are claims, not the absence of
+one. Say where you looked and with what scope — an all-clear you never checked
+reads identically to a real one.
+
+**A proxy check is not a content check.** `ls` and `find` prove a file exists,
+`diff -q` proves bytes differ, `grep -c` and `grep -l` prove a match count — none
+prove what a file says. Open it before reporting on it.
 
 If nothing needed updating in the session, say plainly:
 "Nothing in this session required a system update."

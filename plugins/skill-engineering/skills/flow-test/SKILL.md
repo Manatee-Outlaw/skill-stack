@@ -17,6 +17,7 @@ description: >
   output", "is the PDF right".
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -124,6 +125,8 @@ For each issue found:
    - STATE MISMATCH — what they see doesn't match what's stored
    - FRICTION — works but confusing or slow
 6. **Suggested fix** — one sentence, direction only
+7. **evidence:** plain English: what you actually opened, clicked or walked
+   through to find this. The difference between having looked and having assumed.
 
 End with: **Integration Seam Summary** — which seams are clean, which have gaps.
 

@@ -15,6 +15,7 @@ sources:
 last_updated: 2026-05-27
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-productivity
 ---
 

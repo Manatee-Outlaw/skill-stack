@@ -22,7 +22,7 @@ Each skill is a folder containing `SKILL.md`. Capitalisation is significant.
 
 | Tier | Where it lives | Reaches | Updates |
 |---|---|---|---|
-| **universal** (24) | claude.ai account store | any device, incl. tablets | manual zip upload |
+| **universal** (20) | claude.ai account store | any device, incl. tablets | manual zip upload |
 | **machine** (25) | this repo, as plugins | Claude Code / Cowork | scheduled `git pull` |
 
 Tier is recorded per skill in `metadata.tier`. The universal tier exists because plugins

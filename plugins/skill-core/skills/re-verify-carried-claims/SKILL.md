@@ -10,6 +10,7 @@ description: >
   covers claims READ from a real saved report and repeated without re-checking).
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-core
 ---
 

@@ -14,6 +14,7 @@ description: >
 last_updated: 2026-07-23
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -199,6 +200,13 @@ Check each of these screens for a brand-new user (no data):
 ---
 
 ## Reporting Format
+
+**evidence:** every finding carries one, in plain English — what you actually
+opened, tapped, or walked through. "Opened the check-in form, tapped save, no
+spinner until the response returned" is evidence; it is the difference between
+having looked and having assumed. Not a technical trace, and it does not change
+how the finding itself is worded. A finding with an empty evidence line is a
+hypothesis.
 
 **Before finalizing any finding below: grep the flagged surface for a
 `REVIEWED` marker first** (see respect-settled-decisions). If one exists and

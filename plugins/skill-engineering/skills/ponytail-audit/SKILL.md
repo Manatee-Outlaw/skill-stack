@@ -10,6 +10,7 @@ description: >
   "code hygiene audit", "audit for over-engineering", "what can I delete".
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

@@ -13,6 +13,7 @@ description: >
   git".
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -89,6 +90,12 @@ document name and date, or a plain "no evidence found anywhere checked."
 Flag any finding that changes an item's priority — especially anything
 previously treated as high-risk or urgent that turns out to already be
 resolved, since that's the highest-value output of this skill.
+
+Name that column **evidence:** and tag each row **[proven]** or **[inferred]**. The
+"no evidence found anywhere checked" case above is an absence claim, and an absence
+needs a negative check: say where you searched and with what scope, because it cannot
+quote offending text. A `git log --oneline | grep -c` is a match count, not a content
+check — a row resting on one is [inferred] at best.
 
 ## Success criterion & failure modes
 

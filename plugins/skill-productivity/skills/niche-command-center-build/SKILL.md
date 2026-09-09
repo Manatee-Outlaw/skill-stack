@@ -3,6 +3,7 @@ name: niche-command-center-build
 description: A two-phase skill for designing and building a personalized command center. Phase 1 researches the user's past conversations and proposes a tailored dashboard concept. Phase 2 interviews the user to spec a Node.js MVP running entirely locally with JSON file storage. Use when the user says "build me a command center", "design my dashboard", or "niche command center build skill."
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-productivity
 ---
 

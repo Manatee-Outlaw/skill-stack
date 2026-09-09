@@ -16,6 +16,7 @@ description: >
   because a real gap was found — no trigger phrase needed.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-core
 ---
 

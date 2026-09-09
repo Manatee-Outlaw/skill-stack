@@ -18,6 +18,7 @@ sources:
 last_updated: 2026-05-28
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

@@ -13,6 +13,7 @@ description: >
   use architecture-review instead. This skill is for interactive exploration in chat.
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

@@ -15,6 +15,7 @@ description: >
   confirm host identity against current documentation before naming a host.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-engineering
 ---
 

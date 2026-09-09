@@ -6,6 +6,7 @@ description: >
   message. Also triggers on "deploy", "ship it", "push changes".
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

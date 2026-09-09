@@ -12,6 +12,7 @@ description: >
   phrase needed.
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

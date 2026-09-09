@@ -3,6 +3,7 @@ name: grill-with-docs
 description: A grilling session that challenges your plan against the project's existing language and documented decisions, and updates documentation (CONTEXT.md, decision records) as decisions crystallise. Use when user wants to stress-test a plan, align language before building, or says "grill me on this". Prefer this over grill-me for any coding or engineering project.
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

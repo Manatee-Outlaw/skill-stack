@@ -7,6 +7,7 @@ description: >
   Produces a prioritized findings report without making any changes.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -217,7 +218,23 @@ Complete table of all routes with auth level.
 
 ### FINDINGS (by severity)
 Each finding: location, description, severity, what an attacker could do,
-recommended fix.
+recommended fix, and an **evidence:** line — the command run and its output, or
+the exact code quoted — tagged **[proven]** or **[inferred]**. A finding with an
+empty evidence line is a hypothesis, not a finding.
+
+An absence — "no rate limiting anywhere", "this route has no auth check",
+"no credentials in the repo" — cannot quote offending code, so it escapes the
+rule above. State where you searched and the scope. An unchecked "clean" reads
+identically to a real one.
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 
 ### CREDENTIAL EXPOSURE SUMMARY
 Any credentials found outside of environment variables.

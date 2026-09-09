@@ -14,6 +14,7 @@ description: >
   comprehensive-audit, which dispatches this skill as one of its subagents.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -96,6 +97,13 @@ LOW IMPACT - Code quality issues worth fixing eventually
 
 For each finding: file(s) and line number(s), what the structural problem is, why it
 matters, recommended fix approach (direction only, not code).
+For each finding also give an evidence: line — the command you ran and its output, or
+the exact code quoted — tagged [proven] or [inferred]. An empty evidence line means it
+is a hypothesis, not a finding. For any finding that something is ABSENT (no caller, not
+tracked, no issues found), say where you searched and with what scope: an absence cannot
+quote offending code, so it escapes the rule above unless you state the negative check.
+`ls`, `find`, `diff -q`, `grep -c` and `grep -l` are existence checks, not content
+checks — a finding resting on one is [inferred] at best.
 
 Do not fix anything. Save the report as architecture-review-[today's date].md and present it.
 ```

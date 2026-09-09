@@ -11,6 +11,7 @@ description: >
   "what icon should I use", "the icon isn't showing", "lucide", "phosphor", "icon set".
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-creative
 ---
 

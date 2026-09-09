@@ -3,6 +3,7 @@ name: diagnose
 description: "Disciplined diagnosis loop for hard bugs and performance problems. Follows a strict sequence: build a feedback loop, reproduce, hypothesise, instrument, fix, regression-test. Use when user says 'diagnose this', 'debug this', reports a bug, says something is broken or failing, or describes unexpected behaviour or slow performance."
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

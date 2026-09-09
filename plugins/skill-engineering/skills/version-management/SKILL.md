@@ -11,6 +11,7 @@ description: >
   inconsistent across files — that itself is a drift symptom.
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

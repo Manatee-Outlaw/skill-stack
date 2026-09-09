@@ -14,6 +14,7 @@ description: >
   holistic-code-audit; for structure, architecture-review.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -100,7 +101,24 @@ CRITICAL - Will cause production errors (wrong table/column, undefined variable,
 WARNING - May cause errors under specific conditions (token limits, silent failures, missing auth)
 NOTE - Code quality issues that will not break things
 
-For each finding: file, line number, what is wrong, one-sentence fix.
+For each finding: file, line number, what is wrong, one-sentence fix, and an
+evidence: line — the command you ran and its output, or the exact code quoted —
+tagged [proven] or [inferred]. A finding with an empty evidence line is a
+hypothesis, not a finding.
+
+For any finding that something is ABSENT — no caller, not tracked, no auth check,
+no issues found — say where you searched and with what scope. An absence cannot
+quote offending code, so it escapes the rule above unless you state the negative
+check explicitly.
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 
 Do not fix anything. Save report as engineering-review-[today's date].md and present it.
 ```

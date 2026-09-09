@@ -9,6 +9,7 @@ description: >
   file is created, edited, or published — no trigger phrase needed.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-core
   portability_exempt:
     drive-ref: "Names Drive only in the historical record of why this skill exists."

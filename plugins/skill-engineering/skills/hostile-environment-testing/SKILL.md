@@ -11,6 +11,7 @@ description: >
  is about to be trusted for a wider rollout.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -85,6 +86,20 @@ mode, like `pythonw` instead of `python`, or discards output):
  log file or another way to see what actually happened, even in the
  windowless/silent path — silence is only acceptable for the success
  case, never as the sole behavior for a failure case.
+
+
+**evidence:** every finding carries one — the command run and its output, or the
+exact text quoted — tagged **[proven]** (ran it, read the result) or **[inferred]**
+(reasoned from what you read). A finding with an empty evidence line is a hypothesis.
+
+**An absence needs a negative check.** "Not tracked", "no caller", "nothing reads
+it", "no issues found" cannot quote offending text, which is exactly why they escape
+the rule above. Say where you searched and with what scope.
+
+**A proxy check is not a content check.** `ls` and `find` prove a file exists,
+`diff -q` proves bytes differ, `grep -c` and `grep -l` prove a match count — none
+prove what a file says. If your evidence line names one of those, the finding is
+[inferred] at best.
 
 ## How to actually run a hostile test
 

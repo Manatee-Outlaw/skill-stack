@@ -16,6 +16,7 @@ description: >
   for structure, architecture-review.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -185,6 +186,24 @@ For each finding, state:
 3. What the bug is in plain English
 4. What the impact is (who gets hurt, how)
 5. The suggested fix (one sentence)
+6. **evidence:** the command you ran and its result, or the exact code quoted.
+   A finding with no evidence line is a hypothesis — label it one or drop it.
+7. **[proven] or [inferred]** — ran it and read the result, versus reasoned from
+   reading. Never blend the two in one list (`verify-before-claiming`).
+
+**An absence needs a negative check.** "Nothing calls this", "not tracked",
+"no handler exists", "no issues found" cannot quote offending code — which is why
+they escape point 6. Say where you searched and with what scope. An asserted
+absence you never checked is worse than staying quiet.
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 
 ---
 

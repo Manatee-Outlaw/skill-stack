@@ -11,6 +11,7 @@ description: >
   audit.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-engineering
 ---
 

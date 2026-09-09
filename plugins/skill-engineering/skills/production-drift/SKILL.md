@@ -11,6 +11,7 @@ description: >
   no changes.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -449,6 +450,22 @@ began has been partially vacuous.
 its stated scope covers what you're about to flag, cite it and treat the
 matter as settled — a deliberately-kept piece of drift (like a documented
 override) is not the same as an undocumented one.
+
+Every finding in every section below carries an **evidence:** line — the command
+run on the server and its actual output — tagged **[proven]** or **[inferred]**.
+This report is almost entirely absence claims ("not in git", "no caller", "zero
+rows", "undocumented"), and an absence cannot quote offending text: state where
+you looked and the scope, every time. The DEAD WRITE-PATH section already
+requires this ("State where you searched for callers") — it applies to all of them.
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 
 Produce a report with these sections:
 

@@ -3,6 +3,7 @@ name: grill-me
 description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or says "grill me". Also use at the start of any new feature or task to clarify scope before diving in.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-productivity
 ---
 

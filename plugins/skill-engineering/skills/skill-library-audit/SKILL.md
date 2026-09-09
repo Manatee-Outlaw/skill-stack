@@ -10,6 +10,7 @@ description: >
   quarterly, or whenever a skill "should have fired" and didn't.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
   portability_exempt:
     drive-ref: "Names the pattern it must detect during the staleness check."
@@ -142,26 +143,36 @@ Skills audited: N   (universal: N | machine: N)
 Private skills audited separately: N
 Structural validation: PASS / FAIL (n errors)
 
+Every finding carries an indented `evidence:` line. No exceptions — a finding
+with an empty evidence line is a hypothesis, not a finding.
+
 UNREACHABLE (n)
   <skill> — <why> — suggested description fix
+    evidence: <the description text, quoted> — [proven | inferred]
 
 COLLISIONS (n)
   <skill-a> vs <skill-b> — overlapping phrasing — resolution
+    evidence: <both descriptions, quoted> — [proven | inferred]
 
 TIER ERRORS (n)
   <skill> — declared <tier>, should be <tier> — why
+    evidence: <the filesystem dependency, quoted, or the check showing none> — [proven | inferred]
 
 BROKEN REFERENCES (n)
   <skill> references <missing> — <exists? renamed? retired?>
+    evidence: <the search run for the target, and its scope> — [proven | inferred]
 
 STALE (n)
   <skill> — <what is out of date>
+    evidence: <the outdated text, quoted> — [proven | inferred]
 
 REDUNDANT (n)
   <skill-a> / <skill-b> — merge recommendation
+    evidence: <the overlapping content, quoted from both> — [proven | inferred]
 
 COVERAGE GAPS (n)
   <need> — evidence it exists
+    evidence: <where you looked for an existing skill, and the scope> — [proven | inferred]
 
 FULL INVENTORY
   <name> — <one line> — <plugin> — <tier> — <reachability: OK/WEAK/UNREACHABLE>
@@ -172,6 +183,26 @@ FULL INVENTORY
 - **Read every file.** A skimmed description cannot be judged for reachability.
 - **Quote the evidence.** Every finding names the skill and quotes the offending text.
   A finding without a quote is an opinion (`verify-before-claiming`).
+- **An absence needs a negative check.** "Not in any repo", "no source", "nothing
+  references it", "not under git" cannot quote offending text — which is exactly why
+  they slip past the rule above. Name the artifact you opened that would have contained
+  it, and the scope you searched: `ls -a <dir>`, `git ls-files <path>`, the grep and
+  where it ran. Absence inferred from not having noticed something is not absence.
+  (Carried from `comprehensive-audit`'s GOVERNING STANDARDS, which has enforced this
+  for negative findings since before this skill existed.)
+- **Tag every finding `[proven]` or `[inferred]`.** Proven means you ran something and
+  read the result. Inferred means you reasoned from what you read. Both are legitimate;
+  blending them into one undifferentiated list is not (`verify-before-claiming`'s
+  required report format).
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 - **Do not fix while auditing.** Produce findings; fix in a separate pass. Editing mid-audit
   changes what later checks are reading.
 - **A clean check needs proof it could have failed.** Reporting "no collisions" requires

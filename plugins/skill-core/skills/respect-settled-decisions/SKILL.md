@@ -12,6 +12,7 @@ description: >
   Always-on.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-core
 ---
 

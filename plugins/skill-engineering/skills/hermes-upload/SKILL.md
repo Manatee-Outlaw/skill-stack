@@ -12,6 +12,7 @@ description: >
   "export to hermes", "send to hermes", "hermes handoff".
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-engineering
 ---
 

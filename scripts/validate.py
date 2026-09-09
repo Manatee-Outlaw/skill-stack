@@ -16,6 +16,16 @@ ROOT=pathlib.Path(__file__).resolve().parent.parent
 BLOCK=[l.strip() for l in (ROOT/"scripts/blocklist.txt").read_text().splitlines() if l.strip()]
 NAME_RE=re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
 VALID_EX={"drive-ref","raw-github","project-name","abs-path"}
+
+# A skill that tells you how to write findings must tell you to evidence them.
+# Declared per-skill in frontmatter, never inferred here: a text heuristic cannot
+# separate a findings report from a skill that merely discusses findings (measured
+# 2026-09-09 - every threshold produced both false positives and false negatives).
+# Mandatory, like tier: a new skill cannot be added without answering the question.
+def has_evidence(b):  # substring, not regex: '**evidence:**' and '`evidence:`' both contain it
+    return 'evidence:' in b.lower()
+ABSENCE_RE=re.compile(r'where you searched|where you looked|where it ran|scope you searched|an absence',re.I)
+FIND_HDR=re.compile(r'^#{2,4}\s+.*(report format|output format|present findings|report structure)',re.M|re.I)
 errs=[];warns=[];seen={};tiers={}
 
 def split_fm(t):
@@ -57,6 +67,23 @@ for f in sorted(ROOT.glob("plugins/*/skills/*/SKILL.md")):
     tier=tm.group(1) if tm else None
     if tier not in ("universal","machine"): E(f"metadata.tier missing or invalid: {tier!r}")
     else: tiers[name]=tier
+
+    # ---- findings gate: every skill declares whether it produces findings ----
+    pm=re.search(r'^\s+produces_findings:\s*(\S+)',fm,re.M)
+    pf=pm.group(1).strip().strip('"').strip("'") if pm else None
+    if pf not in ("true","false"):
+        E(f"metadata.produces_findings missing or invalid: {pf!r} (must be true or false)")
+    elif pf=="true":
+        if not has_evidence(body):
+            E("produces_findings: true but no 'evidence:' slot in its report format "
+              "- a finding format that never asks for evidence is where assumption hides")
+        elif not ABSENCE_RE.search(body):
+            warns.append(f"{name}: has an evidence slot but no absence rule - an absence "
+                         "cannot quote offending text, so it escapes the evidence line")
+    else:
+        if FIND_HDR.search(body) and len(re.findall(r'finding',body,re.I))>=6:
+            warns.append(f"{name}: declares produces_findings: false but reads like a "
+                         "findings report - re-check the declaration")
 
     # exemptions, declared in frontmatter with a mandatory reason
     ex=set()

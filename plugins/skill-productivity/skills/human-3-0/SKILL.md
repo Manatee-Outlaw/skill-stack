@@ -3,6 +3,7 @@ name: human-3-0
 description: Activate the HUMAN 3.0 personal development coaching framework. Conducts an adaptive interview across four life domains (Mind, Body, Spirit, Vocation), identifies the user's development level and patterns, and delivers a personalised transformation strategy. Use when the user says "coach me", "run my Human 3.0 assessment", "Human 3.0", "assess my development", or asks for a personal development review.
 metadata:
   tier: universal
+  produces_findings: false
   plugin: skill-productivity
 ---
 

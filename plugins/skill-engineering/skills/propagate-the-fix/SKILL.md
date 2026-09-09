@@ -11,6 +11,7 @@ description: >
   status claim.
 metadata:
   tier: machine
+  produces_findings: false
   plugin: skill-engineering
 ---
 

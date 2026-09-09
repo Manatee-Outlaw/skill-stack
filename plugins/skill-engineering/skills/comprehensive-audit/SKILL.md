@@ -15,6 +15,7 @@ description: >
   Never run a partial audit when this skill triggers.
 metadata:
   tier: machine
+  produces_findings: true
   plugin: skill-engineering
 ---
 
@@ -80,6 +81,21 @@ audit" means:
   could have come back dirty — a scan that aborted, a grep with a rejected
   pattern, or a query that never ran reports "clean" identically to a real
   pass.
+- **Every finding carries an `evidence:` line**, tagged `[proven]` or
+  `[inferred]` — the command run and its output, or the exact text quoted.
+  The negative-findings rule above is the most-violated standard in this set
+  precisely because it lives in prose and nothing in a report format asks for
+  it. The evidence line is where it gets enforced: an absence finding whose
+  evidence line does not name where you searched is not reportable.
+**A proxy check is not a content check.** `ls` and `find` prove a file exists.
+`diff -q` and checksums prove bytes differ. `grep -c` and `grep -l` prove a match
+count. None of them prove what the file *says*. If the command on your evidence
+line is one of those, the finding is `[inferred]` at best — open the file before
+it ships. (This is not hypothetical: on 2026-09-09 an `ls` that listed a README
+became "no version control", a `diff -q` became "stale, needs re-upload", and a
+`grep -c` became "this rule needs writing" — all three wrong, all three one file
+read away from correct.)
+
 - **propagate-the-fix**: for any finding that looks like a duplicated
   pattern, search for sibling instances elsewhere in the codebase before
   finalizing — report every instance found, not just the first one.
