@@ -3,7 +3,7 @@
   "owner": { "name": "Manatee-Outlaw" },
   "metadata": {
     "description": "Project-agnostic skill library. Machine tier ships as plugins; universal tier uploads to the claude.ai account store.",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     { "name": "skill-core",         "source": "./plugins/skill-core",         "description": "Always-on reasoning disciplines plus adhd divergent ideation. Install on every machine." },
