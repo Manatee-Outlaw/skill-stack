@@ -35,7 +35,13 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/dist}"
 PRIVATE_ROOT="${2:-}"
 
-command -v zip >/dev/null || { echo "ERROR: zip not found on PATH."; exit 1; }
+# zip is preferred, but is absent on Windows/Git-Bash authoring machines. Falling
+# back to the stdlib keeps the bundles buildable rather than silently unbuilt.
+if command -v zip >/dev/null; then ZIPPER=zip
+elif command -v python >/dev/null; then ZIPPER=python
+elif command -v python3 >/dev/null; then ZIPPER=python3
+else echo "ERROR: need either zip or python on PATH."; exit 1; fi
+echo "zipper: $ZIPPER"
 
 mkdir -p "$OUT"
 n=0
@@ -56,7 +62,11 @@ build_one() {
     fi
 
     rm -f "$OUT/$name.plugin"
-    ( cd "$plugin_dir" && zip -qr "$OUT/$name.plugin" .claude-plugin skills )
+    if [ "$ZIPPER" = "zip" ]; then
+        ( cd "$plugin_dir" && zip -qr "$OUT/$name.plugin" .claude-plugin skills )
+    else
+        "$ZIPPER" "$ROOT/scripts/zipdir.py" "$OUT/$name.plugin" "$plugin_dir" >/dev/null
+    fi
 
     local count size
     count="$(find "$plugin_dir/skills" -name SKILL.md | wc -l | tr -d ' ')"
