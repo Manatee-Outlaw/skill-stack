@@ -16,10 +16,36 @@ Claude see this skill"*, work out which path it took.
 | Path | Where it lives | Reaches | Refreshed by |
 |---|---|---|---|
 | **Account store** | claude.ai → Customize → Skills | **everywhere** — web, mobile, Cowork, Claude Code | Re-upload by hand. `scripts/build-zips.sh` builds the per-skill zips (universal tier only). |
-| **Cowork bundle** | an installed `.plugin` file | **Cowork only** | `scripts/build-plugins.sh`, then re-install each bundle. Nothing else. |
-| **CLI marketplace** | `claude plugin marketplace add <path or repo>` | **Claude Code only** | `claude plugin marketplace update <name>`, or `scripts\sync.bat`. |
-| **Claude Code user skills** | `%USERPROFILE%\.claude\skills\<name>` | **Claude Code only** | Manual — re-clone or `git pull` in that folder. |
+| **Account plugin upload** | uploaded `.plugin`, held server-side as "My Uploads"; materialised locally under `local-agent-mode-sessions\…\rpm\` | **every desktop-app agent session** — Cowork *and* the Code tab. NOT Cowork-only. | Upload in the desktop app. Nothing local reaches it — not the repo, not the CLI cache, not `dist/`. |
+| **CLI marketplace** | `claude plugin marketplace add <path or repo>`, cached under `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` | Claude Code CLI **and** the desktop app (see precedence below) | **Bump the version in `plugin.json` first**, then `claude plugin update <name>@<marketplace>`. An update without a version bump is a silent no-op. |
+| **Claude Code user skills** | `%USERPROFILE%\.claude\skills\<name>` | Claude Code CLI **and the desktop Code tab** (proven 2026-09-09) | Manual — re-clone or `git pull` in that folder. |
 | **Project scope** | `<project>\.agents\skills\<name>` | only agents whose working folder is that project | Manual. Narrowest scope available. |
+
+### Which copy actually wins, when a plugin exists on two paths
+
+A desktop session reads the account-upload plane **and** the CLI plugin cache. When the
+same plugin name is present in both, **the account upload wins.** Verified 2026-09-09:
+`skill-engineering` existed as an Aug 28 account upload (1.0.0) and as a CLI cache entry
+(1.1.0); a desktop session loaded the 1.0.0 copy, confirmed by reading the base directory
+the skill was actually served from. `ponytail`, `impeccable` and `legal-skills` exist in
+**no** account upload and load in that same session from the CLI cache — which is how we
+know both planes are read rather than one.
+
+The consequence is nasty: **updating the CLI plane changes nothing you can see in the
+desktop app if an account upload of the same name exists.** A full skill-library audit was
+run against twelve-day-old skill bodies this way, with an up-to-date CLI cache sitting right
+beside it, and nothing anywhere reported a problem.
+
+### The refresh key is a version string, not file content
+
+`claude plugin update` compares the `version` in `plugin.json`. Edit fifty skills, leave the
+version alone, and the plugin cache never changes — while the command prints
+`already at the latest version`. All five plugins here sat at `1.0.0` from creation until
+2026-09-09, so **every skill edit between 2026-08-27 and then was invisible to Claude Code.**
+
+Bump the version as part of shipping, not as an afterthought. `scripts\sync.bat` does not do
+this and cannot: it only runs `marketplace update`, which refreshes the marketplace
+*definition* and never touches installed plugin content.
 
 ### The rule that decides everything
 
@@ -47,6 +73,13 @@ Two behaviours worth knowing, both observed directly rather than assumed:
 
 - **Installing a `.plugin` bundle refreshes a live session.** The skills become available
   immediately; no restart needed.
+- **A `.plugin` upload can be accepted and still not persist.** On 2026-09-09 five bundles
+  were uploaded through the desktop app; it matched them to existing plugins and prompted
+  *"you're going to replace the underlying file"*. After confirming: claude.ai still showed
+  1.0.0, two fresh server fetches still returned `updatedAt: 2026-08-28T21:24`, and the new
+  content existed nowhere on disk outside the repo and the CLI cache. No error was shown, and
+  app logging had been inactive since 2026-08-24, so nothing recorded the attempt. Treat an
+  upload as unverified until the version visibly changes on claude.ai.
 - **A CLI marketplace update does not.** `marketplace update` returned ok and changed
   nothing a running Cowork session could see.
 
@@ -61,11 +94,20 @@ the name:
 
 ### Open questions — unverified, do not repeat as fact
 
-- **Does Cowork read `%USERPROFILE%\.claude\skills`?** Evidence says no: `unlazy` sits
-  there and has never appeared in a Cowork session. Not proven — that folder is outside
-  what a Cowork session can inspect, so the conclusion rests on absence.
-- **Why does `ponytail` show installed and enabled in the desktop Plugins panel while being
-  absent from a Cowork session's plugin set?** Possibly a per-surface toggle. Unresolved.
+- ~~**Does Cowork read `%USERPROFILE%\.claude\skills`?**~~ **Partly answered 2026-09-09.**
+  The **desktop Code tab does**: `brainstorming` was loaded in a live session, exists in zero
+  account-upload plugins, and lives only at `%USERPROFILE%\.claude\skills\brainstorming`.
+  The old "evidence says no" rested on never having seen `unlazy` appear — an absence nobody
+  had checked directly, which is the reasoning `verify-before-claiming` exists to forbid.
+  **Cowork specifically is still untested**; do not extend the Code-tab result to it.
+- ~~**Why does `ponytail` show installed in the desktop Plugins panel but not in Cowork?**~~
+  **Half answered 2026-09-09.** `ponytail` loads fine in the desktop Code tab, served from
+  the CLI plugin cache — so the desktop app reads that plane. Whether Cowork also does, and
+  therefore why it was missing there, remains open.
+- **Still open, and now the blocking one: how do you ship to the account-upload plane?**
+  The only known route is the desktop app's upload, and on 2026-09-09 it did not persist
+  (see above). Until that is resolved the desktop plane cannot be updated at all — and it
+  takes precedence over the CLI plane for any plugin name present in both.
 
 ---
 
