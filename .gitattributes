@@ -12,6 +12,11 @@
 
 * text=auto eol=lf
 
+# EXCEPT Windows batch files: cmd.exe resolves call/goto labels by byte offset assuming
+# CRLF. Under LF, sync.bat skipped lines and re-ran itself after "Press any key".
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
 # Never touch these
 *.zip binary
 *.png binary
