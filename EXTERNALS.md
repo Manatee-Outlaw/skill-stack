@@ -17,7 +17,7 @@ Claude see this skill"*, work out which path it took.
 |---|---|---|---|
 | **Account store** | claude.ai → Customize → Skills | **everywhere** — web, mobile, Cowork, Claude Code | Re-upload by hand. `scripts/build-zips.sh` builds the per-skill zips (universal tier only). |
 | **Account plugin upload** | uploaded `.plugin`, held server-side as "My Uploads"; materialised locally under `local-agent-mode-sessions\…\rpm\` | **every desktop-app agent session** — Cowork *and* the Code tab. NOT Cowork-only. | Upload in the desktop app. Nothing local reaches it — not the repo, not the CLI cache, not `dist/`. |
-| **CLI marketplace** | `claude plugin marketplace add <path or repo>`, cached under `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` | Claude Code CLI **and** the desktop app (see precedence below) | **Bump the version in `plugin.json` first**, then `claude plugin update <name>@<marketplace>`. An update without a version bump is a silent no-op. |
+| **CLI marketplace** | `claude plugin marketplace add <path or repo>`, cached under `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` | Claude Code CLI **and** the desktop app (see precedence below) | The pre-commit hook bumps `plugin.json`; scheduled `sync.bat` runs `claude plugin update`. An update without a version bump is a silent no-op — see below. |
 | **Claude Code user skills** | `%USERPROFILE%\.claude\skills\<name>` | Claude Code CLI **and the desktop Code tab** (proven 2026-09-09) | Manual — re-clone or `git pull` in that folder. |
 | **Project scope** | `<project>\.agents\skills\<name>` | only agents whose working folder is that project | Manual. Narrowest scope available. |
 
@@ -43,9 +43,15 @@ version alone, and the plugin cache never changes — while the command prints
 `already at the latest version`. All five plugins here sat at `1.0.0` from creation until
 2026-09-09, so **every skill edit between 2026-08-27 and then was invisible to Claude Code.**
 
-Bump the version as part of shipping, not as an afterthought. `scripts\sync.bat` does not do
-this and cannot: it only runs `marketplace update`, which refreshes the marketplace
-*definition* and never touches installed plugin content.
+**Since 2026-10-03 this is automatic on the authoring machine.** `scripts/hooks/pre-commit`
+runs `validate.py` (blocking on failure), then bumps the patch version of every plugin whose
+content is staged without a version change. `scripts\sync.bat` switches the hook on
+(`git config core.hooksPath scripts/hooks`) and, after `marketplace update` (which refreshes
+only the marketplace *definition*), runs `claude plugin update` for every installed plugin. The
+scheduled task "Sync Claude Skill Stack" runs it at logon and daily at 09:30, so a committed
+skill edit reaches the CLI cache — and the desktop Code tab, where no account upload of the same
+name shadows it — without anyone remembering a step. A clone without the hook (the dev box's
+`deploy/publish-skill.sh` bumps on its own) still needs a manual bump.
 
 ### The rule that decides everything
 

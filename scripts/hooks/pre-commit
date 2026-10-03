@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# pre-commit for skill-stack. Enabled per clone by: git config core.hooksPath scripts/hooks
+# (sync.bat sets it on the authoring machine).
+#
+# 1. VALIDATE. scripts/validate.py must pass or the commit is blocked. Runs first, so a
+#    blocked commit leaves nothing bumped behind.
+#    ponytail: validates the working tree, not the staged snapshot - good enough for one author.
+# 2. VERSION BUMP. `claude plugin update` only refreshes a plugin whose plugin.json version
+#    changed - edit fifty skills, keep the version, and every machine silently keeps the old
+#    copy (2026-08-27..09-09: twelve days of edits invisible to Claude Code). So for every
+#    plugin with staged changes and no staged version change, bump the patch number and stage
+#    it. An author's own bump (or deploy/publish-skill.sh's on the dev box) is left alone.
+#
+# Bypass in an emergency: git commit --no-verify
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+# Take the first interpreter that actually RUNS: on Windows `python3` is often the Microsoft
+# Store stub, which exists on PATH and fails when called.
+PY=""; for c in python3 python py; do "$c" -c "" >/dev/null 2>&1 && { PY="$c"; break; }; done
+[ -n "$PY" ] || { echo "pre-commit: no python on PATH - cannot bump versions or validate. Commit blocked."; exit 1; }
+
+if ! out="$("$PY" "$ROOT/scripts/validate.py" 2>&1)"; then
+  echo "$out" | grep -E '^(ERROR|FAIL)'
+  echo "pre-commit: validate.py failed - commit blocked. Fix the errors above."
+  exit 1
+fi
+
+for p in $(git diff --cached --name-only -- plugins | awk -F/ 'NF>3 && $3!=".claude-plugin" {print $2}' | sort -u); do
+  pj="plugins/$p/.claude-plugin/plugin.json"
+  [ -f "$ROOT/$pj" ] || continue
+  if git diff --cached -- "$pj" | grep -q '^+.*"version"'; then continue; fi
+  change="$("$PY" - "$ROOT/$pj" <<'EOF'
+import re, sys
+p = sys.argv[1]
+t = open(p, encoding="utf-8", newline="").read()
+m = re.search(r'("version"\s*:\s*")(\d+)\.(\d+)\.(\d+)"', t)
+if not m:
+    sys.exit("no x.y.z version in " + p)
+new = f"{m[2]}.{m[3]}.{int(m[4]) + 1}"
+open(p, "w", encoding="utf-8", newline="").write(t[:m.start()] + m[1] + new + '"' + t[m.end():])
+print(f"{m[2]}.{m[3]}.{m[4]} -> {new}")
+EOF
+)" || { echo "pre-commit: could not bump $pj: $change"; exit 1; }
+  git add "$ROOT/$pj"
+  echo "pre-commit: $p $change"
+done
+

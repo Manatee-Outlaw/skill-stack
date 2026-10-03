@@ -7,6 +7,7 @@ REM
 REM   1. git pull                  - fetch new skill content from GitHub
 REM   2. validate                  - catch a broken skill before it gets used
 REM   3. plugin marketplace update - re-read the marketplace definition
+REM   4. plugin update (each)      - install new plugin versions; the pre-commit hook bumps them
 REM
 REM Runs both pull and marketplace update deliberately. Whether a local-path
 REM marketplace re-reads per session or caches is untested; doing both makes the
@@ -24,9 +25,12 @@ set "FAILED="
 > "%LOG%" echo ===== sync started %DATE% %TIME% =====
 call :say "Repo: %CD%"
 
+REM Turn on the repo's pre-commit hook (version bump + validate) in this clone. Idempotent.
+git config core.hooksPath scripts/hooks >> "%LOG%" 2>&1
+
 REM --- 1. pull ---------------------------------------------------------------
 call :say ""
-call :say "[1/3] Pulling latest skills..."
+call :say "[1/4] Pulling latest skills..."
 git pull --ff-only >> "%LOG%" 2>&1
 if errorlevel 1 (
   call :say "  FAILED: git pull. Common causes:"
@@ -41,7 +45,7 @@ if errorlevel 1 (
 REM --- 2. validate -----------------------------------------------------------
 REM Find a working Python. Windows installs vary: py launcher, python, python3.
 call :say ""
-call :say "[2/3] Validating..."
+call :say "[2/4] Validating..."
 set "PY="
 for %%C in (py python python3) do (
   if not defined PY (
@@ -65,7 +69,7 @@ if not defined PY (
 
 REM --- 3. marketplace --------------------------------------------------------
 call :say ""
-call :say "[3/3] Refreshing marketplace..."
+call :say "[3/4] Refreshing marketplace..."
 where claude >nul 2>&1
 if errorlevel 1 (
   call :say "  FAILED: 'claude' not found on PATH."
@@ -78,6 +82,19 @@ if errorlevel 1 (
     set "FAILED=1"
   ) else (
     call :say "  ok"
+  )
+  REM marketplace update refreshes the DEFINITION only. Installed plugin content changes only
+  REM on "plugin update", and only when plugin.json's version changed - which the pre-commit
+  REM hook now guarantees. A plugin that is not installed reports an error here; not fatal.
+  call :say ""
+  call :say "[4/4] Updating installed plugins..."
+  for %%P in (skill-core skill-engineering skill-creative skill-productivity skill-enterprise) do (
+    claude plugin update %%P@skill-stack >> "%LOG%" 2>&1
+    if errorlevel 1 ( call :say "  %%P: update FAILED - see log" & set "FAILED=1" ) else ( call :say "  %%P: ok" )
+  )
+  if exist "%~dp0..\..\skill-stack-private\plugins" (
+    claude plugin update skill-private@skill-stack-private >> "%LOG%" 2>&1
+    if errorlevel 1 ( call :say "  skill-private: update FAILED - see log" & set "FAILED=1" ) else ( call :say "  skill-private: ok" )
   )
 )
 
