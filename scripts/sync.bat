@@ -107,7 +107,7 @@ call :say ""
 call :say "[5/5] Backup + staleness check..."
 if exist "%~dp0..\..\skill-stack-private\scripts\backup.ps1" (
   powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\skill-stack-private\scripts\backup.ps1" >> "%LOG%" 2>&1
-  if errorlevel 1 ( call :say "  private backup: NOT done - is N: connected? see log" ) else ( call :say "  private backup: ok" )
+  if errorlevel 1 ( call :say "  private backup: NOT done - the reason is in sync.log" ) else ( call :say "  private backup: ok" )
 )
 set "DRIFT="
 if defined PY (
