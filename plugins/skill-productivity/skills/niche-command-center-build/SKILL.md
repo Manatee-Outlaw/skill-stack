@@ -200,9 +200,10 @@ app.delete('/api/[module]/:id', (req, res) => { ... })
 
 After building, save this skill file into the skill-stack repo (edited in place, per verify-before-versioning) as:
 
-`productivity/niche-command-center-build.md`
+`plugins/skill-productivity/skills/niche-command-center-build/SKILL.md`
 
-And add the following trigger line to any relevant bundle files:
+Triggering comes from the frontmatter `description` (bundle files are retired). Keep these
+trigger phrases in it:
 
 ```
 - "Build me a command center" / "Design my dashboard" / "niche command center build skill" → niche-command-center-build

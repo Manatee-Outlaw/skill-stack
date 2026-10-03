@@ -17,6 +17,8 @@ metadata:
   tier: machine
   produces_findings: true
   plugin: skill-engineering
+  portability_exempt:
+    raw-github: "The dev box runs this audit without installed plugins; it fetches each sub-skill from its raw URL."
 ---
 
 # Comprehensive Audit (Subagent Edition)
@@ -29,7 +31,7 @@ back before synthesizing a single consolidated report.
 **THE FUTUREPROOFING RULE:**
 The AUDIT SKILLS list below is the single source of truth.
 One skill = one subagent. Always. No exceptions.
-Adding skill #11 means appending it to the list. It gets its own
+Adding the next skill means appending it to the list. It gets its own
 dedicated subagent automatically — no other changes to this skill required.
 Never batch two audit skills into one subagent.
 
@@ -49,16 +51,37 @@ move them back out into the task author's hands.
 1. **engineering-review** — database errors, undefined vars, silent failures, auth gaps
 2. **holistic-code-audit** — logic, failure modes, security, race conditions, edge cases
 3. **architecture-review** — async/sync mismatches, god functions, coupling, SPOF
-4. **security-audit** — route auth inventory, injection, XSS, credentials, rate limits
+4. **security-audit** — route auth inventory, injection, XSS, credentials, rate limits, identity trust chain
 5. **external-integration-audit** — `<host-app>`/`<streaming-tool>`/vendor field names, event coverage
 6. **production-drift** — git vs `<production-host>` sync, execute permissions, cron, env vars
 7. **flow-test** — end-to-end user journeys, integration seams, silent failures
 8. **database-hygiene** — UNIQUE constraints, idempotency, retention policies, orphans
 9. **anticipate-user-mistakes** — innocent actions with disproportionate consequences
 10. **ponytail-audit** — accumulated mess, duplicated logic, dead/superseded files
+11. **render-smoke** — rendered-DOM broken-render signatures (undefined/NaN/$0/undefinedh) + interaction-backed fake-success, driven through a seeded non-production environment
+12. **persistence-audit** — write paths that silently stopped: tables that should be growing and aren't, and the guards that blocked themselves
+13. **promise-reality-audit** — sentences the product or docs state about system state (copy, toasts, empty states, runbooks, CLAUDE.md, schedules) checked TRUE against the live signal
+14. **decision-conformance-audit** — every recorded owner decision written as an invariant, every code path that could violate it enumerated and proven, one cross-path test per decision
+15. **clock-and-timezone-audit** — every time comparison, schedule and 'today' names its clock (host TZ vs cron vs UTC vs user; DST; as_of)
+16. **fixture-realism-audit** — tests fed what production feeds: real-input regression corpus, relative seed dates that never age out, behaviour pins with reasons
 
-*To add skill #11: append it here with a one-line description.
+*To add skill #17: append it here with a one-line description.
 It will receive its own dedicated subagent in the next audit automatically.*
+
+**Where each subagent gets its skill text.** Where the skill-engineering plugin is
+installed, every skill above loads by name — use that copy. Where it is not (a
+server or dev box that runs this audit without installing plugins), fetch the
+skill raw from its single source of truth:
+
+```
+https://raw.githubusercontent.com/Manatee-Outlaw/skill-stack/main/plugins/<plugin>/skills/<name>/SKILL.md
+```
+
+Every skill in this list lives in `skill-engineering`. Fetch the raw file with a
+plain HTTP GET (`curl -fsSL`), never through a summarising web fetch — a summary
+silently drops the rules the subagent is supposed to apply. A fetch that fails or
+returns anything but a file starting with `---` is a stop: report which skill could
+not be loaded, never run its subagent from memory.
 
 ---
 
@@ -210,9 +233,14 @@ Before spawning any subagents, read all major project files completely:
   overlay, a delivered file. Not the template. Not the generator code. Not
   a fresh test render. An actual artifact an actual user actually received.
   Source files cannot tell you that a document ends mid-sentence or that
-  half a framework is missing from it. Pass it to the flow-test subagent.
-  If no real artifact can be obtained, say so explicitly in the report —
-  that is a gap in the audit's coverage, not a detail to omit.
+  half a framework is missing from it. Pass it to the flow-test AND the
+  render-smoke subagents (render it as the user saw it, at phone and
+  desktop widths). Save a copy in the audit folder so every subagent reads
+  the same artifact. If no real artifact can be obtained — including when a
+  permission policy refuses copying real user content out of production —
+  say so explicitly in the report, and say what was used instead (e.g. text
+  built from the code's own templates in the production shape): that is a
+  gap in the audit's coverage, not a detail to omit.
 
 Pass the relevant file contents as context when spawning each subagent.
 Each subagent needs the codebase to do its job.
@@ -224,7 +252,7 @@ Launch all subagents simultaneously — do not wait for one to finish before
 starting the next. Each subagent operates independently with its own context.
 
 For each subagent, embed the full instructions from its corresponding skill
-(you have these in context from the engineering bundle), AND embed the full
+(loaded by name, or fetched raw as described under AUDIT SKILLS), AND embed the full
 GOVERNING STANDARDS section above verbatim — every subagent must apply all
 of it, not just the skill it's specifically assigned. Each subagent must:
 1. Run its assigned skill checks completely and independently
@@ -233,10 +261,15 @@ of it, not just the skill it's specifically assigned. Each subagent must:
 
    [SKILL NAME] FINDINGS:
    CRITICAL: [finding] | FILE: [file:line] | FIX: [one-line description]
+     evidence: [proven|inferred] [command + output, or exact quoted text; for an absence, where you searched]
    HIGH: [finding] | FILE: [file:line] | FIX: [one-line description]
+     evidence: ...
    MEDIUM: [finding] | FILE: [file:line] | FIX: [one-line description]
+     evidence: ...
    LOW: [finding] | FILE: [file:line] | FIX: [one-line description]
+     evidence: ...
    QUICK WIN: [finding] | FILE: [file:line] | FIX: [one-line description]
+     evidence: ...
    ALL CLEAR: [list every check that passed cleanly — and for each, how
    you know it could have come back dirty]
 
@@ -250,7 +283,12 @@ of it, not just the skill it's specifically assigned. Each subagent must:
    fails. If the answer is "a broken product", it is not LOW. "Can this
    break?" and "is this doing its job?" are different questions with the
    same reassuring answer — ask both, and report the second one.
-5. Never change any files — report only
+5. Never change any files — report only. Each subagent gets its OWN private
+   scratch folder, named in its prompt (e.g. `<audit-folder>/<skill>/`), and
+   writes every repro script, dump and query result there. Never a shared
+   filename: in a measured run two subagents both wrote `prod_schema.txt` to
+   the shared scratchpad and one silently overwrote the other's evidence
+   mid-run. The findings file is the only thing written outside that folder.
 6. For ponytail-audit findings: triage as RESOLVED / KEPT AS-IS (with
    reasoning) / DEFERRED (with a stated trigger to revisit) — this same
    triage, via close-known-gaps, applies to every finding from every
@@ -271,3 +309,55 @@ Save the report to a dated file (comprehensive-audit-[date].md) rather
 than deleting it — this is the project's audit history and should persist.
 
 Do not fix anything automatically — this skill is audit and report only.
+
+---
+
+## Step 4 — Fix wave (ONLY when the user explicitly asks for fixes)
+
+The audit itself never fixes. When the user asks to "do all fixes", run this
+procedure; it is what kept a 50-finding fix wave across one large codebase to
+zero regressions and one deploy (measured 2026-10-02).
+
+1. **Verify before fixing.** Re-read each finding's proof yourself. Findings
+   reported by several subagents independently are usually the most real; a
+   finding with only code-review proof gets a repro first.
+2. **Batch the decisions, not the fixes.** Separate findings that need the
+   OWNER (they change what users or staff experience — sign-in methods, what a
+   delete button does, what a card promises) from those you can rule on. Ask
+   the owner all of theirs at once, with a recommendation each, while subagents
+   are still running. Record each answer as a dated decision.
+3. **Partition by file ownership.** Group the rest into batches so no two
+   batches edit the same functions (e.g. reports / bot / auth / UI / docs).
+   Where two batches must touch one file, assign each the exact region
+   ("only the Account email card markup and its handler").
+4. **One worktree + branch per batch**, created by the orchestrator from the
+   current main. One implementer subagent per batch, given: a shared rules file
+   (worktree only; never merge, push to main or deploy; TDD — every behaviour fix
+   has a test watched FAILING on the old code first, the break proven to have
+   landed; known environment-only test failures listed; no secrets; production
+   read-only) and its batch file (the findings by id, and every owner decision
+   and ruling verbatim). Each writes a per-batch report: change, test, red→green
+   proof, open questions.
+5. **Review each branch before merging.** Read the security-sensitive diffs
+   yourself (anything touching auth, identity, money or outbound messages).
+   Answer implementers' open questions as rulings; send small follow-ups back to
+   the same implementer rather than patching in the merge.
+6. **Integrate on a separate branch**, merging smallest/least-conflicting first.
+   Resolve each conflict by COMBINING both sides (two batches appending to the
+   same list or doc line), never by picking one; re-run the tests both sides
+   touched. Cross-batch concerns no batch owned (e.g. a new notification type
+   that must be scoped to the right audience) are fixed here with their own
+   red-first test.
+7. **Before merging any branch, confirm the pushed tip is the whole branch**
+   (no unpushed commits or uncommitted files in any worktree for it). A merged
+   branch once missed its author's final, unpushed commit; the trial merge and
+   the full suite both passed on the incomplete code.
+8. **Full suite in the main checkout** on the integrated code (not a worktree:
+   some tests only run there), plus the project's layout/journey checks. Then
+   deploy through the normal gated path, then any manual production steps the
+   batches listed (crontab, service units), each with a backup, a diff that shows
+   only the expected change, and a live verification.
+9. **Report** findings fixed / deferred (with triggers) / kept, the deployed
+   commit, and the suite results; record decisions and outcomes in the project's
+   roadmap or decision register the same day. Remove merged worktrees only after
+   checking each for uncommitted or unmerged work.

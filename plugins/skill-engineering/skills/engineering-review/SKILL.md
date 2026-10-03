@@ -30,7 +30,9 @@ prioritized findings report grouped by severity. Does not fix anything — repor
   takes 10-15 minutes, better for pre-release audits
 
 ## Triggers
-`engineering review` / `code audit` / `run audit` / `bug hunt` / `check the codebase` / `audit the code`
+`engineering review` / `bug hunt` / the named defect classes below.
+A bare `code audit` / `run audit` / `check the codebase` belongs to comprehensive-audit,
+which dispatches this skill as one of its subagents.
 
 ---
 

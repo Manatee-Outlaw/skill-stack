@@ -23,9 +23,11 @@ metadata:
 # Holistic Code Audit Skill
 
 ## When to use this skill
-Use whenever the user asks for a **code review**, **audit**, **debugging session**,
-or **"check my code"** — including after making fixes, to verify no new issues
-were introduced.
+Use when the nine-discipline correctness sweep is what is wanted — "review this
+for correctness", race conditions, edge cases, failure modes — including after
+making fixes, to verify no new issues were introduced. A bare **code review**,
+**audit** or **"check my code"** belongs to comprehensive-audit, which dispatches
+this skill as one of its subagents.
 
 For a full 8-check bug hunt via Claude Code (deeper, longer), use engineering-review.
 This skill runs the audit here in chat. Both are complementary — run this first,

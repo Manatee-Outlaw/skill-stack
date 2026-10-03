@@ -3,9 +3,10 @@ name: verify-before-claiming
 description: >
   Require real execution evidence before reporting anything as fixed, working,
   deployed, or verified. Trigger automatically before writing "fixed",
-  "deployed", "verified", "already resolved", "works correctly" or similar in
-  any report. Applies equally to negative results — "clean", "no hits", "no
-  errors found", "nothing to report", "all tests passed" need the same proof,
+  "deployed", "is live", "verified", "already resolved", "works correctly" or
+  similar in any report. Applies equally to negative results — "clean", "no
+  hits", "no errors found", "no issues", "nothing to report", "all tests
+  passed" need the same proof,
   because a check that aborted or never ran produces output identical to a
   genuine pass. Trigger before reporting any clean scan, audit, grep, health
   check or test result, and whenever a command returns nothing, an empty string,

@@ -208,9 +208,23 @@ Claude Code will not load a local skill beside a synced one of the same name.
 | Licence | MIT |
 | Local copy | `plugins/skill-core/skills/adhd/SKILL.md` |
 | Tier | **universal** |
-| Status | **FORK — body tracks upstream, description deliberately diverges** |
+| Status | **FORK — description and six role-neutral body edits deliberately diverge; everything else tracks upstream** |
 
-**What diverges: the description only. The body is upstream's.**
+**What diverges: the description, plus a small fixed set of role-neutral body edits.** Measured
+2026-10-02 against upstream `skills/adhd/SKILL.md` (11118 bytes). The body edits exist to make the
+body honour the broader description — without them the body says "coding agent" while the
+description promises business use:
+
+1. Intro: "senior engineer" → "any senior practitioner — engineer, marketer, founder", plus
+   launch angle / pricing page / product name as examples.
+2. Pre-flight Step 1: brainstorming phrases ("brainstorm", "let's figure out", …) opt in
+   automatically; upstream opts in only on `/adhd` or an explicit ADHD-mode request.
+3. Step 2 high-stakes list: adds launch angle, pricing model, positioning, go-to-market;
+   "Side project at 11pm" → "A throwaway tweak at 11pm".
+4. Viability score: "could it actually ship" → "shipped or executed with the resources at hand".
+5. Deepen step: builder/coder first step → domain-neutral ("write the code, draft the copy,
+   mock the page, run the test").
+6. Upstream's closing `## Source spec` section is not carried (see below).
 
 | | Upstream | Ours |
 |---|---|---|
@@ -226,13 +240,15 @@ decisions. Upstream's description scopes it to coding agents, so it would not fi
 
 1. Fetch `https://raw.githubusercontent.com/UditAkhourii/adhd/main/skills/adhd/SKILL.md`
 2. Diff **the body only** — everything below the frontmatter.
-3. Take upstream's body changes wholesale; the method is theirs and improves upstream.
+3. Take upstream's body changes wholesale; the method is theirs and improves upstream —
+   then re-apply the six role-neutral edits listed above.
 4. **Never take upstream's description.** Re-apply ours.
 5. Re-check ours is still ≤1024 chars — it is universal-tier, so the account-store cap
    applies (`scripts/validate.py` enforces this).
 
-Because the divergence is one field, a re-sync is a one-field decision. Keep it that way:
-if the bodies ever diverge, this stops being a managed fork and becomes an unmanaged one.
+Because the divergence is one field plus a listed set of body edits, a re-sync stays a
+checklist. Keep it that way: any body edit not in the list above turns this into an unmanaged
+fork — add it to the list the same day, or revert it.
 
 **Known upstream-only section:** `SOURCE-SPEC.md` reference. Not carried locally. Harmless.
 

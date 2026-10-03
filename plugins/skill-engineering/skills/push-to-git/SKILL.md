@@ -37,9 +37,9 @@ today's date.
 
 ### Step 1.5 — Skill registration gate (run before creating task.md)
 
-If this commit adds or renames ANY file under a skill directory
-a new skill was added, the push is NOT complete until `scripts/validate.py`
-passes.
+If this commit adds or renames ANY file under a skill directory (any
+`plugins/<plugin>/skills/<name>/`), the push is NOT complete until
+`scripts/validate.py` passes.
 
 Check it mechanically, do not eyeball it:
 
@@ -151,4 +151,5 @@ After the user pastes the Claude Code output back here:
   but NOT live — flag this clearly
 - Always use the exact SSH command above — do not abbreviate or skip the restart
 - Never use `git add .` blindly — use `git add -u` for modified tracked files
-- Never report a skill as "pushed", "added", or "live" on the strength of the commit alone — a skill is live only once a bundle names it. Run the Step 1.5 orphan check and quote its (empty) output before saying so.
+- Never report a skill as "pushed", "added", or "live" on the strength of the commit alone. Run the Step 1.5 gate and quote its `PASS` output before saying so — and for a new skill, say whether its description was checked for reachability (`skill-library-audit` Check 1). (In a library that still uses bundle load lists, a skill is live only once a bundle names it — run that library's orphan check and quote its empty output.)
+- Never commit without running Step 1.6 — the `git diff --cached --stat` shape must match what the commit message claims.

@@ -119,6 +119,27 @@ Report: "Logged lesson: [title] → Notion Lesson Log".
 Only record things with durable value — something worth referencing in six months. Casual
 back-and-forth is not a lesson.
 
+#### Experiences
+
+An `experience` is a story or hard-won insight the user shared — the type that most easily
+drifts into anecdote. Keep it referenceable with this page body:
+
+```
+Context: [What situation produced this — 1 sentence]
+
+## What happened
+[2-4 sentences. Factual. What did they do, decide, or observe?]
+
+## The lesson
+[1-2 sentences. The durable takeaway, stated as guidance — not a retelling.]
+
+## Why it matters
+[1-2 sentences. What goes wrong if this is forgotten?]
+
+## Tags
+[2-4 keywords finer than `Applies to`: e.g. sales, agency, systems, decision-making]
+```
+
 ---
 
 ### Step 4 — Stale and duplicate content
@@ -137,8 +158,10 @@ Format each flag as:
 
 If any skill was updated, created, or removed:
 
-1. Create a new README with the updated Current Versions table (next version number: v6, v7, etc.)
-2. Confirm to the user: "Created README (vN - current).md — delete the previous README."
+1. Read the current README, then **edit it in place** so its skill list / current-state
+   table matches what changed. No `README (vN - current)` copies — the same in-place rule
+   as Step 2 applies; git history is the version log.
+2. Confirm to the user: "Updated README — [what changed]".
 
 If nothing changed that affects the README, skip this step and say so.
 

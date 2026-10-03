@@ -3,8 +3,10 @@ name: security-audit
 description: >
   Focused security review of a web application. Covers authentication
   inventory, input validation, injection risks, XSS exposure, credential
-  handling, session security, file system risks, and rate limiting gaps.
-  Produces a prioritized findings report without making any changes.
+  handling, session security, file system risks, rate limiting gaps,
+  cross-project auth, the identity trust chain (every writer of a field that
+  grants access, e.g. a typed-in linked-account ID that later becomes a sign-in
+  key), and impersonation / "view as" write refusal. Produces a prioritized findings report without making any changes.
 metadata:
   tier: machine
   produces_findings: true
@@ -193,6 +195,47 @@ For any API call made from one project to another:
 - Does the target validate the credential on every request?
 - Is there any inter-service communication that happens without auth
   because "it's internal"?
+
+---
+
+## Step 10 — Identity trust chain (who can make an account believe it is someone)
+
+A field that only ROUTES something (where to send a message, which channel to post in) can be
+written loosely. The day a feature makes that same field GRANT ACCESS (sign-in, password reset,
+account recovery, "linked account" login), every writer of it becomes an authentication path —
+and the feature's diff never touches them.
+
+Measured case: a staff form let a manager TYPE a user's chat-platform ID onto an account. Harmless
+while the ID only addressed report messages. Then "sign in with <platform>" shipped and matched
+accounts on that ID: a mistyped or malicious ID would have let a stranger sign in as the account owner.
+The sign-in change was reviewed and correct; the form was in another file.
+
+For every field that grants access — password hash, email (if reset-by-email exists), linked OAuth
+IDs, phone, pairing codes, API/ingestion tokens, recovery codes:
+1. List EVERY writer (routes, admin forms, bots, imports, migrations, CLI scripts) — search by the
+   column, not the feature. Say what you searched.
+2. Rank each writer by what it PROVES about the person: OAuth round trip / verified possession (high),
+   current-password re-auth (high), owner approval of a machine match (medium), staff typing a value
+   (low), unauthenticated input (none).
+3. Finding: any writer weaker than the strongest path that READS the field to grant access. Fix by
+   removing the weak writer or demoting the field's power, never by "be careful".
+4. Changing an access-granting field from a live session must re-authenticate (current password or
+   a fresh OAuth round trip), and should notify the OLD value's owner (e.g. the old email address).
+
+---
+
+## Step 11 — Impersonation / "view as" inventory
+
+If staff can act as a user (impersonation tokens, "view as", support mode):
+1. Enumerate every route that writes ANYTHING (from the framework's URL map, not by reading code
+   for the ones you remember), and drive each one with an impersonation token against a scratch DB.
+2. Every write that changes the user's identity, credentials, linked accounts, contact details,
+   consents or delivery targets must be REFUSED under impersonation. A deny-list that is maintained
+   by hand misses new routes: report each missing route, and recommend a test that walks the URL map
+   and fails on any identity-changing route not denied.
+3. Background writes the browser makes on its own (auto-detected timezone/locale, "last seen"
+   pings) must also be skipped or refused under impersonation — they write the STAFF member's
+   browser facts onto the user.
 
 ---
 

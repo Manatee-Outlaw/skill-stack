@@ -171,6 +171,32 @@ the machine you are picking up on has failed at its only job.
 - **Chat title uncertain**: ask. Never guess — a wrong key silently splits a chat's history
   into two pages.
 
+## Retired steps (the versioned-file flow) — do not run them
+
+The previous version of this skill wrote a new versioned text file into a cloud folder on
+every run. Those steps are kept here by name so a session that remembers them knows what
+replaced each one — and so nobody "restores" them.
+
+### Step 3 — Find or Create the "Hermes Handoffs" Folder
+Replaced by Step 3 above: the destination is the Notion database, which already exists.
+Never create a folder or a second database for handoffs.
+
+### Step 4 — Determine the Version Number
+Retired. There is no version number. The old rule was "never assume v1 without checking";
+its surviving form is "always search before writing" — the search now decides **update vs
+create**, not which suffix to add.
+
+### Step 5 — Upload the File
+Replaced by Steps 4a/4b. The handoff is the page body, not an attached file.
+
+### Step 6 — Confirm to User
+Replaced by Step 5 above, which adds the page URL and whether the page was created or
+updated.
+
+**Old versioned files found elsewhere** (`<Chat Name> v1`, `v2`, …): do not keep writing to
+them. If a chat already has a series, carry the latest one's content into its single
+Notion page and tell the user the old files can be retired.
+
 ## Hard Rules
 
 - Always use the exact chat title — never derive, shorten, or invent a name.

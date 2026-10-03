@@ -82,7 +82,7 @@ before. State explicitly that the check was done.
 
 **5. Portability check before committing.**
 The library is project-agnostic by design. A skill must contain no project name, no
-absolute local path, and no reference to a specific cloud folder. `scripts/validate.sh`
+absolute local path, and no reference to a specific cloud folder. `python scripts/validate.py`
 enforces this; run it rather than eyeballing.
 
 ## What to do, every time
@@ -91,7 +91,7 @@ enforces this; run it rather than eyeballing.
    it, do not add a suffix.
 2. **Creating a NEW skill:** confirm no skill of that name exists in either repo; use a
    clean suffix-free name matching its folder; run the privacy triage and
-   `scripts/validate.sh` before committing.
+   `python scripts/validate.py` before committing.
 3. **Publishing to the public repo:** run the three-test triage; default to private on any
    doubt; say the check was done.
 4. **Uploading to the account store:** same triage. A universal-tier skill goes to a cloud

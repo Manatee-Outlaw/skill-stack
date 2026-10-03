@@ -209,3 +209,6 @@ Two corollaries:
 5. If the implementer follows this LITERALLY and the world is not as I assume —
    what breaks? If the answer is "something irreversible", the task is not
    ready.
+6. Does every literal command I hand a person name the machine to run it on,
+   state what output proves it worked, and name a host I confirmed against the
+   current-state document today? (Rule 6)

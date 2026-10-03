@@ -1,17 +1,17 @@
 ---
 name: flow-test
 description: >
-  Walk through complete user journeys in a software product to find where flows
-  silently fail, dead-end, show wrong state, or leave users stuck. Includes an
-  integration seam check — mapping where data flows between components before
-  tracing individual journeys, to catch cross-component bugs journey tracing
-  alone misses. Use to test a feature end-to-end, verify an onboarding flow,
-  check that data appears where it should, or confirm UI paths lead to correct
+  Walk complete user journeys in a product to find where flows silently fail,
+  dead-end, show wrong state, or leave users stuck. Includes an integration
+  seam check — mapping where data flows between components before tracing
+  individual journeys, to catch cross-component bugs journey tracing alone
+  misses. Use to test a feature end-to-end, verify an onboarding flow, check
+  that data appears where it should, or confirm UI paths lead to correct
   outcomes. Also covers reading the real artifact a flow delivers — a report,
   PDF, email or export — as the recipient reads it, because a document that ends
-  mid-sentence or leaks internal reasoning is invisible to code review and to
-  "it generated without an error". Run before releasing a feature, after a
-  significant codebase change, or when a user reports unexpected behaviour.
+  mid-sentence, drops half its content or leaks internal reasoning is invisible
+  to code review and to "it generated without an error". Run before releasing a
+  feature, after a big codebase change, or when a user reports odd behaviour.
   Trigger phrases: "test this flow", "walk through the user journey", "check
   this end-to-end", "flow test", "check the actual report", "read a real
   output", "is the PDF right".
@@ -127,6 +127,11 @@ For each issue found:
 6. **Suggested fix** — one sentence, direction only
 7. **evidence:** plain English: what you actually opened, clicked or walked
    through to find this. The difference between having looked and having assumed.
+
+**An absence needs a negative check.** "This seam is clean", "nothing reads that
+value", "no silent failures in this flow" cannot point at a broken step, so they
+escape the evidence line unless you say where you looked and how far — which
+screens, which files, which steps you actually walked.
 
 End with: **Integration Seam Summary** — which seams are clean, which have gaps.
 
