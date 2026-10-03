@@ -8,6 +8,7 @@ REM   1. git pull                  - fetch new skill content from GitHub
 REM   2. validate                  - catch a broken skill before it gets used
 REM   3. plugin marketplace update - re-read the marketplace definition
 REM   4. plugin update (each)      - install new plugin versions; the pre-commit hook bumps them
+REM   5. backup + check            - private skills to N:, then check-drift.py (notifies on problems)
 REM
 REM Runs both pull and marketplace update deliberately. Whether a local-path
 REM marketplace re-reads per session or caches is untested; doing both makes the
@@ -30,7 +31,7 @@ git config core.hooksPath scripts/hooks >> "%LOG%" 2>&1
 
 REM --- 1. pull ---------------------------------------------------------------
 call :say ""
-call :say "[1/4] Pulling latest skills..."
+call :say "[1/5] Pulling latest skills..."
 git pull --ff-only >> "%LOG%" 2>&1
 if errorlevel 1 (
   call :say "  FAILED: git pull. Common causes:"
@@ -45,7 +46,7 @@ if errorlevel 1 (
 REM --- 2. validate -----------------------------------------------------------
 REM Find a working Python. Windows installs vary: py launcher, python, python3.
 call :say ""
-call :say "[2/4] Validating..."
+call :say "[2/5] Validating..."
 set "PY="
 for %%C in (py python python3) do (
   if not defined PY (
@@ -69,7 +70,7 @@ if not defined PY (
 
 REM --- 3. marketplace --------------------------------------------------------
 call :say ""
-call :say "[3/4] Refreshing marketplace..."
+call :say "[3/5] Refreshing marketplace..."
 where claude >nul 2>&1
 if errorlevel 1 (
   call :say "  FAILED: 'claude' not found on PATH."
@@ -87,7 +88,7 @@ if errorlevel 1 (
   REM on "plugin update", and only when plugin.json's version changed - which the pre-commit
   REM hook now guarantees. A plugin that is not installed reports an error here; not fatal.
   call :say ""
-  call :say "[4/4] Updating installed plugins..."
+  call :say "[4/5] Updating installed plugins..."
   for %%P in (skill-core skill-engineering skill-creative skill-productivity skill-enterprise) do (
     claude plugin update %%P@skill-stack >> "%LOG%" 2>&1
     if errorlevel 1 ( call :say "  %%P: update FAILED - see log" & set "FAILED=1" ) else ( call :say "  %%P: ok" )
@@ -98,10 +99,34 @@ if errorlevel 1 (
   )
 )
 
+REM --- 5. back up private skills, then check every delivery path -------------
+REM The backup script lives in the private folder (it handles private files). The check writes
+REM scripts\drift-report.txt. Because a scheduled run's window closes by itself, any problem
+REM also raises a Windows notification - otherwise nobody would ever see it.
+call :say ""
+call :say "[5/5] Backup + staleness check..."
+if exist "%~dp0..\..\skill-stack-private\scripts\backup.ps1" (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\skill-stack-private\scripts\backup.ps1" >> "%LOG%" 2>&1
+  if errorlevel 1 ( call :say "  private backup: NOT done - is N: connected? see log" ) else ( call :say "  private backup: ok" )
+)
+set "DRIFT="
+if defined PY (
+  !PY! scripts\check-drift.py >> "%LOG%" 2>&1
+  if errorlevel 1 ( set "DRIFT=1" & call :say "  check: something needs attention - see scripts\drift-report.txt" ) else ( call :say "  check: everything current" )
+) else (
+  call :say "  check: SKIPPED - no Python"
+)
+if defined FAILED set "DRIFT=1"
+if defined DRIFT (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0notify.ps1" -Title "Skill stack needs attention" -Message "Ask Claude: read F:\Projects\skill-stack\scripts\drift-report.txt and sync.log" >nul 2>&1
+)
+
 REM --- summary ---------------------------------------------------------------
 call :say ""
 if defined FAILED (
   call :say "RESULT: finished WITH ERRORS. Full detail: %LOG%"
+) else if defined DRIFT (
+  call :say "RESULT: sync ok, but something needs attention - see scripts\drift-report.txt"
 ) else (
   call :say "RESULT: all good."
 )
