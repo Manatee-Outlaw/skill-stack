@@ -110,11 +110,14 @@ the name:
   served from `/root/.claude/plugins/synced/<id>/skill-engineering/` — the account upload.
   `icon-libraries` reached it from the claude.ai account store (proven by its frontmatter lacking
   the plugin copy's `produces_findings` line). So **Cowork reads account uploads + account-store
-  skills only.** Decision the same day: uploads of skill-core, skill-creative, skill-enterprise
-  and skill-productivity removed (every skill Cowork needed from them is universal, so it still
-  arrives via the account store); skill-engineering and skill-private kept as uploads for
-  Cowork's sake — which means they shadow the auto-updated CLI copy in the Code tab too, and
-  each edit to them needs a fresh `.plugin` upload (`scripts/build-plugins.sh`).
+  skills only.** The same day, re-uploading current skill-engineering and skill-private bundles
+  was again accepted on screen and **never persisted** (rpm copies stayed 1.0.0 / 2026-08-28) —
+  the app's *replace* path is broken, while *remove* works. Since an upload also shadows the
+  auto-updated copy in the Code tab, keeping a frozen one actively hid newer skills there.
+  **Decision 2026-10-03: all six skill-stack uploads removed.** The desktop Code tab now reads the
+  auto-updated CLI cache; Cowork gets every universal skill from the account store and does not
+  have the machine-tier ones. To give Cowork a machine-tier skill, upload it to the account store
+  as an individual skill — never as a `.plugin` (frozen, and shadows the Code tab).
 - ~~**Why does `ponytail` show installed in the desktop Plugins panel but not in Cowork?**~~
   **Half answered 2026-09-09.** `ponytail` loads fine in the desktop Code tab, served from
   the CLI plugin cache — so the desktop app reads that plane. Whether Cowork also does, and
