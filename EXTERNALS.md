@@ -105,7 +105,16 @@ the name:
   account-upload plugins, and lives only at `%USERPROFILE%\.claude\skills\brainstorming`.
   The old "evidence says no" rested on never having seen `unlazy` appear — an absence nobody
   had checked directly, which is the reasoning `verify-before-claiming` exists to forbid.
-  **Cowork specifically is still untested**; do not extend the Code-tab result to it.
+  **Cowork does NOT — answered 2026-10-03.** A fresh Cowork session had neither `ponytail` nor
+  `superpowers` (both installed only as CLI plugins), and the `ponytail-audit` it did find was
+  served from `/root/.claude/plugins/synced/<id>/skill-engineering/` — the account upload.
+  `icon-libraries` reached it from the claude.ai account store (proven by its frontmatter lacking
+  the plugin copy's `produces_findings` line). So **Cowork reads account uploads + account-store
+  skills only.** Decision the same day: uploads of skill-core, skill-creative, skill-enterprise
+  and skill-productivity removed (every skill Cowork needed from them is universal, so it still
+  arrives via the account store); skill-engineering and skill-private kept as uploads for
+  Cowork's sake — which means they shadow the auto-updated CLI copy in the Code tab too, and
+  each edit to them needs a fresh `.plugin` upload (`scripts/build-plugins.sh`).
 - ~~**Why does `ponytail` show installed in the desktop Plugins panel but not in Cowork?**~~
   **Half answered 2026-09-09.** `ponytail` loads fine in the desktop Code tab, served from
   the CLI plugin cache — so the desktop app reads that plane. Whether Cowork also does, and
