@@ -12,7 +12,8 @@ Checks, on this machine:
   3. desktop     - any of our plugins uploaded to the desktop app (frozen; shadows the plugins)
   4. claude.ai   - a universal skill whose claude.ai copy differs from the repo (upload its zip),
                    claude.ai edited AFTER the repo (bring it back first - the manatee lesson), or a
-                   private skill sitting on claude.ai
+                   private skill sitting on claude.ai (unless listed in the private folder's
+                   claude-ai-exceptions.txt - then it is drift-checked like a universal one)
   5. backup      - private skills not backed up in the last 2 days
 
 Writes scripts/drift-report.txt. Exit 0 = all current, 1 = something to do.
@@ -100,30 +101,42 @@ if mirrors:
         manifest = {s["name"]: s for s in json.loads(mf.read_text(encoding="utf-8")).get("skills", [])}
     acct = {d.name: fm_and_body((d / "SKILL.md").read_text(encoding="utf-8"))[1]
             for d in acct_dir.iterdir() if (d / "SKILL.md").exists()}
+    def compare(name, s, is_git=True):  # claude.ai copy vs the local one
+        if norm(acct[name]) == norm(s["body"]):
+            return
+        up = manifest.get(name, {}).get("updatedAt", "")
+        local = (git("log", "-1", "--format=%cI", "--", str(s["file"].relative_to(ROOT))) if is_git
+                 else dt.datetime.fromtimestamp(s["file"].stat().st_mtime, dt.timezone.utc).isoformat())
+        newer_online = False
+        try:
+            newer_online = dt.datetime.fromisoformat(up.replace("Z", "+00:00")) >                            dt.datetime.fromisoformat(local)
+        except ValueError:
+            pass
+        if newer_online:
+            problems.append(f"claude.ai: '{name}' was EDITED ON CLAUDE.AI after the local copy's last change - "
+                            "ask Claude to bring that version back BEFORE uploading anything over it")
+        else:
+            problems.append(f"claude.ai: '{name}' is out of date there - upload a fresh zip of it "
+                            "(ask Claude to build the zips first)")
     for name, s in public.items():
         if s["tier"] != "universal":
             continue
         if name not in acct:
             problems.append(f"claude.ai: '{name}' is universal but not on claude.ai - upload dist/{name}.zip")
-        elif norm(acct[name]) != norm(s["body"]):
-            up = manifest.get(name, {}).get("updatedAt", "")
-            last_commit = git("log", "-1", "--format=%cI", "--", str(s["file"].relative_to(ROOT)))
-            newer_online = False
-            try:
-                newer_online = dt.datetime.fromisoformat(up.replace("Z", "+00:00")) > \
-                               dt.datetime.fromisoformat(last_commit)
-            except ValueError:
-                pass
-            if newer_online:
-                problems.append(f"claude.ai: '{name}' was EDITED ON CLAUDE.AI after the repo's last change - "
-                                "ask Claude to bring that version into the repo BEFORE uploading anything over it")
-            else:
-                problems.append(f"claude.ai: '{name}' is out of date there - upload dist/{name}.zip "
-                                "(ask Claude to build the zips first)")
-    for name in private:
-        if name in acct:
+        else:
+            compare(name, s)
+    # Owner-approved private skills allowed on claude.ai: one name per line, reasons in the README
+    exc_file = PRIVATE / "claude-ai-exceptions.txt"
+    allowed = ({l.split("#")[0].strip() for l in exc_file.read_text(encoding="utf-8").splitlines()} - {""}
+               if exc_file.exists() else set())
+    for name, s in private.items():
+        if name not in acct:
+            continue
+        if name in allowed:
+            compare(name, s, is_git=False)  # allowed there, but must still match
+        else:
             problems.append(f"claude.ai: private skill '{name}' is on claude.ai - the private folder's "
-                            "README forbids this; remove it there or record a deliberate exception")
+                            "README forbids this; remove it there or add it to claude-ai-exceptions.txt")
 else:
     notes.append("claude.ai: SKIPPED - no local copy of the account's skills found (desktop app not installed?)")
 
