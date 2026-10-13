@@ -122,7 +122,9 @@ if mirrors:
         if s["tier"] != "universal":
             continue
         if name not in acct:
-            problems.append(f"claude.ai: '{name}' is universal but not on claude.ai - upload dist/{name}.zip")
+            problems.append(f"claude.ai: '{name}' is universal but not on claude.ai - upload dist/{name}.zip "
+                            "(if claude.ai says the name is in use, Anthropic ships a skill with that name: "
+                            "rename ours)")
         else:
             compare(name, s)
     # Owner-approved private skills allowed on claude.ai: one name per line, reasons in the README

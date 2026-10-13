@@ -1,5 +1,5 @@
 ---
-name: internal-comms
+name: team-comms
 description: Write structured internal business communications using proven templates. Use whenever asked to write a status report, project update, leadership briefing, 3P update (Progress/Plans/Problems), all-hands email, incident report, FAQ, change notification, or any internal company communication. Apply this skill for any internal writing task, even if the user just says "write a quick update" or "draft an email to the team".
 metadata:
   tier: universal
@@ -7,7 +7,7 @@ metadata:
   plugin: skill-enterprise
 ---
 
-# Internal Comms
+# Team Comms
 
 Write clear, structured internal communications using the right template for the context. Adjust tone and detail level based on the audience.
 
