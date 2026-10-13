@@ -151,7 +151,7 @@ if PRIVATE.is_dir():
         age_days = (time.time() - status.stat().st_mtime) / 86400
         if age_days > 2:
             problems.append(f"backup: last private-skills backup was {age_days:.0f} days ago - "
-                            "is the N: drive connected? (EZ Connect)")
+                            "is the N: drive connected? (open it in File Explorer)")
 
 # report ------------------------------------------------------------------------------------
 stamp = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
