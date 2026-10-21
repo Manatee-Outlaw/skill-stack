@@ -8,3 +8,4 @@ refs-phosphor/
 .claude/settings.local.json
 scripts/sync.log
 scripts/drift-report.txt
+scripts/pc-check.txt

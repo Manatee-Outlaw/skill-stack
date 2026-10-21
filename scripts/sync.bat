@@ -9,6 +9,7 @@ REM   2. validate                  - catch a broken skill before it gets used
 REM   3. plugin marketplace update - re-read the marketplace definition
 REM   4. plugin update (each)      - install new plugin versions; the pre-commit hook bumps them
 REM   5. backup + check            - private skills to N:, then check-drift.py (notifies on problems)
+REM   6. PC check                  - lists Claude background jobs left running on this PC (reports only)
 REM
 REM Runs both pull and marketplace update deliberately. Whether a local-path
 REM marketplace re-reads per session or caches is untested; doing both makes the
@@ -31,7 +32,7 @@ git config core.hooksPath scripts/hooks >> "%LOG%" 2>&1
 
 REM --- 1. pull ---------------------------------------------------------------
 call :say ""
-call :say "[1/5] Pulling latest skills..."
+call :say "[1/6] Pulling latest skills..."
 git pull --ff-only >> "%LOG%" 2>&1
 if errorlevel 1 (
   call :say "  FAILED: git pull. Common causes:"
@@ -46,7 +47,7 @@ if errorlevel 1 (
 REM --- 2. validate -----------------------------------------------------------
 REM Find a working Python. Windows installs vary: py launcher, python, python3.
 call :say ""
-call :say "[2/5] Validating..."
+call :say "[2/6] Validating..."
 set "PY="
 for %%C in (py python python3) do (
   if not defined PY (
@@ -70,7 +71,7 @@ if not defined PY (
 
 REM --- 3. marketplace --------------------------------------------------------
 call :say ""
-call :say "[3/5] Refreshing marketplace..."
+call :say "[3/6] Refreshing marketplace..."
 where claude >nul 2>&1
 if errorlevel 1 (
   call :say "  FAILED: 'claude' not found on PATH."
@@ -88,7 +89,7 @@ if errorlevel 1 (
   REM on "plugin update", and only when plugin.json's version changed - which the pre-commit
   REM hook now guarantees. A plugin that is not installed reports an error here; not fatal.
   call :say ""
-  call :say "[4/5] Updating installed plugins..."
+  call :say "[4/6] Updating installed plugins..."
   for %%P in (skill-core skill-engineering skill-creative skill-productivity skill-enterprise) do (
     claude plugin update %%P@skill-stack >> "%LOG%" 2>&1
     if errorlevel 1 ( call :say "  %%P: update FAILED - see log" & set "FAILED=1" ) else ( call :say "  %%P: ok" )
@@ -104,7 +105,7 @@ REM The backup script lives in the private folder (it handles private files). Th
 REM scripts\drift-report.txt. Because a scheduled run's window closes by itself, any problem
 REM also raises a Windows notification - otherwise nobody would ever see it.
 call :say ""
-call :say "[5/5] Backup + staleness check..."
+call :say "[5/6] Backup + staleness check..."
 if exist "%~dp0..\..\skill-stack-private\scripts\backup.ps1" (
   powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\skill-stack-private\scripts\backup.ps1" >> "%LOG%" 2>&1
   if errorlevel 1 ( call :say "  private backup: NOT done - the reason is in sync.log" ) else ( call :say "  private backup: ok" )
@@ -120,6 +121,14 @@ if defined FAILED set "DRIFT=1"
 if defined DRIFT (
   powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0notify.ps1" -Title "Skill stack needs attention" -Message "Ask Claude: read F:\Projects\skill-stack\scripts\drift-report.txt and sync.log" >nul 2>&1
 )
+
+REM --- 6. PC check: Claude background jobs still running (reports only) ------
+REM Lists jobs Claude started on this PC that are still running after 6 hours, with the command to stop
+REM them. It never stops anything itself. Writes scripts\pc-check.txt; when it finds something it raises
+REM its own Windows notification, because a scheduled run's window closes by itself.
+call :say ""
+call :say "[6/6] PC check..."
+for /f "usebackq delims=" %%L in (`powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0pc-check.ps1"`) do call :say "  %%L"
 
 REM --- summary ---------------------------------------------------------------
 call :say ""
@@ -144,11 +153,14 @@ endlocal & exit /b 0
 :say
 REM An empty arg must print a real blank line. Plain "echo" with nothing after it
 REM prints "ECHO is off." instead, which made clean runs look like failures.
-if "%~1"=="" (
+REM The text goes through !SAY_LINE!, not %~1: inside this if-block a ")" in %~1 closed the block early
+REM ("still was unexpected at this time", 2026-10-21), so any line with parentheses broke the script.
+set "SAY_LINE=%~1"
+if not defined SAY_LINE (
   echo.
   >> "%LOG%" echo.
 ) else (
-  echo %~1
-  >> "%LOG%" echo %~1
+  echo(!SAY_LINE!
+  >> "%LOG%" echo(!SAY_LINE!
 )
 goto :eof
