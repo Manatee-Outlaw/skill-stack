@@ -284,11 +284,16 @@ of it, not just the skill it's specifically assigned. Each subagent must:
    break?" and "is this doing its job?" are different questions with the
    same reassuring answer — ask both, and report the second one.
 5. Never change any files — report only. Each subagent gets its OWN private
-   scratch folder, named in its prompt (e.g. `<audit-folder>/<skill>/`), and
-   writes every repro script, dump and query result there. Never a shared
-   filename: in a measured run two subagents both wrote `prod_schema.txt` to
-   the shared scratchpad and one silently overwrote the other's evidence
-   mid-run. The findings file is the only thing written outside that folder.
+   scratch folder, named in its prompt, OUTSIDE the project's reports folder
+   (e.g. `<home>/audit-scratch-<audit-date>/<skill>/`), and writes every
+   codebase copy, repro script, dump, fixture, query result and bulk
+   screenshot there. Never a shared filename: in a measured run two
+   subagents both wrote `prod_schema.txt` to the shared scratchpad and one
+   silently overwrote the other's evidence mid-run. Only the findings file
+   and the evidence it cites by name go into the audit folder. Scratch
+   placed inside it (`<audit-folder>/<skill>/`) once left two codebase
+   copies and 175 MB of sweep screenshots in a gitignored reports folder,
+   tripping its size alarm.
 6. For ponytail-audit findings: triage as RESOLVED / KEPT AS-IS (with
    reasoning) / DEFERRED (with a stated trigger to revisit) — this same
    triage, via close-known-gaps, applies to every finding from every
