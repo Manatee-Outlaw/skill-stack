@@ -64,8 +64,11 @@ move them back out into the task author's hands.
 14. **decision-conformance-audit** — every recorded owner decision written as an invariant, every code path that could violate it enumerated and proven, one cross-path test per decision
 15. **clock-and-timezone-audit** — every time comparison, schedule and 'today' names its clock (host TZ vs cron vs UTC vs user; DST; as_of)
 16. **fixture-realism-audit** — tests fed what production feeds: real-input regression corpus, relative seed dates that never age out, behaviour pins with reasons
+17. **ux-review** — heuristic UX evaluation of creator-, staff- and owner-facing screens: status visibility, error prevention, consistency, empty/loading states, helpful errors, reachable controls, voice matching the promise
+18. **mobile-ux** — phone-width use of the most frequent screens: touch targets, readable text, small-screen navigation, scroll behaviour, the mobile flows users actually rely on
+19. **hostile-environment-testing** — installers, launchers, desktop apps and cron/scheduled scripts run under messy real-world conditions (wrong Python/PATH, odd working folder, already running, interrupted), not one clean run
 
-*To add skill #17: append it here with a one-line description.
+*To add skill #20: append it here with a one-line description.
 It will receive its own dedicated subagent in the next audit automatically.*
 
 **Where each subagent gets its skill text.** Where the skill-engineering plugin is
