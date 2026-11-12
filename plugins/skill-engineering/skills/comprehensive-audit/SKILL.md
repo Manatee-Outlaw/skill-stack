@@ -326,9 +326,21 @@ The audit itself never fixes. When the user asks to "do all fixes", run this
 procedure; it is what kept a 50-finding fix wave across one large codebase to
 zero regressions and one deploy (measured 2026-10-02).
 
-1. **Verify before fixing.** Re-read each finding's proof yourself. Findings
-   reported by several subagents independently are usually the most real; a
-   finding with only code-review proof gets a repro first.
+1. **A skeptic tries to disprove every finding before anyone fixes it.** Give
+   each finding to a fresh subagent that did not find it, with the finding, its
+   file and its claimed failure scenario, told to DISPROVE it with evidence (read
+   the real callers, run a focused test) and to call it refuted unless it
+   confirmed the defect itself. A finding the skeptic refutes is not fixed; list
+   it under "disproved" with the skeptic's reason. Use two skeptics for a finding
+   touching privacy, secrets, money or anything sent to a user, and keep it
+   unless both refute it (dropping a real one costs more there). Run skeptics on
+   a stronger model than the finders and name the model on every subagent. Why:
+   a finder that is wrong sounds exactly as sure as one that is right, so the
+   coordinator re-reading the finder's own proof is not an independent check.
+   (Adopted 2026-11-11 from a partner team's verify gate, decision D-94 in
+   the owner's roadmap.) Findings reported by several subagents independently are
+   usually the most real, but they still get their skeptic; a finding with only
+   code-review proof gets a repro first.
 2. **Batch the decisions, not the fixes.** Separate findings that need the
    OWNER (they change what users or staff experience — sign-in methods, what a
    delete button does, what a card promises) from those you can rule on. Ask
